@@ -14,7 +14,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 /*****************************************************************************************************
  * SwaggerWeb Application Configuration For Project Controller Paths.
  *
- * @author Rupesh Patil
  * @version 1.1
  * SwaggerWeb Appliaction Configuration For Project Controller Paths. 
  *  
