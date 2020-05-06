@@ -20,7 +20,6 @@ import com.bookstore.dao.IBookDAO;
 import com.bookstore.exception.BookAlreadyExist;
 import com.bookstore.exception.BookNotFoundException;
 import com.bookstore.exception.InvalidTokenOrExpiredException;
-import com.bookstore.exception.UserDoesNotExistException;
 import com.bookstore.model.Book;
 import com.bookstore.model.UserData;
 import com.bookstore.response.BookResponse;
@@ -33,8 +32,9 @@ import lombok.extern.slf4j.Slf4j;
  * of IBookService Interface methods like add book,delete book, Update Book. 
  *
  * @author Rupesh Patil
- * @version 1.0
+ * @version 2.0
  * @created 2020-04-11
+ * @updated 5/06/20
  * @see {@link IBookDAO} implementation of all the required DB related functionality
  * @see {@link restTemplate} will Inject Object for communicate two web-apis.
  * @see {@link JwtTokenUtil} for parse and generate token.
@@ -61,8 +61,8 @@ public class BookServiceImpl implements IBookService {
      * @return ResponseEntity<BookResponse>
      ********************************************************************/
 	@Override
-	public ResponseEntity<BookResponse> addBook(Book book, String token) {
-		if (verifyUser(token)) {
+	public ResponseEntity<BookResponse> addBook(Book book) {
+		
 			String bookName = book.getBookName().toLowerCase().trim();
 			if (bookdao.getBookByName(bookName) == null) {
 				book.setUserId(userId);
@@ -72,9 +72,7 @@ public class BookServiceImpl implements IBookService {
 			} else {
 				throw new BookAlreadyExist();
 			}
-		} else {
-			throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
-		}
+		
 	}
 
 	/*********************************************************************
@@ -83,8 +81,8 @@ public class BookServiceImpl implements IBookService {
      * @return ResponseEntity<BookResponse>
      ********************************************************************/
 	@Override
-	public ResponseEntity<BookResponse> removeBook(int id, String token) {
-		if (verifyUser(token)) {
+	public ResponseEntity<BookResponse> removeBook(int id) {
+		
 			log.info("book data" + bookdao.getBookByBookId(id));
 			if (bookdao.getBookByBookId(id) != null) {
 				if (bookdao.deleteBook(id) > 0)
@@ -96,9 +94,6 @@ public class BookServiceImpl implements IBookService {
 			} else {
 				throw new BookNotFoundException();
 			}
-		} else {
-			throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
-		}
 
 	}
 
@@ -109,17 +104,15 @@ public class BookServiceImpl implements IBookService {
      ********************************************************************/
 	
 	@Override
-	public ResponseEntity<BookResponse> getAllBooks(String token) {
-		if (verifyUser(token)) {
+	public ResponseEntity<BookResponse> getAllBooks() {
+		
 			if (bookdao.getAllBooks() != null) {
 				return ResponseEntity.status(HttpStatus.ACCEPTED).body(new BookResponse(202,
 						"Total Books Are:" + bookdao.getAllBooks().size(), bookdao.getAllBooks()));
 			} else {
 				throw new BookNotFoundException();
 			}
-		} else {
-			throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
-		}
+		
 	}
 
 	/*********************************************************************
@@ -130,8 +123,8 @@ public class BookServiceImpl implements IBookService {
      * @return ResponseEntity<BookResponse>
      ********************************************************************/
 	@Override
-	public ResponseEntity<BookResponse> getSellerBooks(String token) {
-		if (verifyUser(token)) {
+	public ResponseEntity<BookResponse> getSellerBooks() {
+		
 			if (bookdao.getAllBooks() != null) {
 				List<Book> books = bookdao.getAllBooks().stream().filter(p -> p.getUserId() == userId)
 						.collect(Collectors.toList());
@@ -141,9 +134,7 @@ public class BookServiceImpl implements IBookService {
 			} else {
 				throw new BookNotFoundException();
 			}
-		} else {
-			throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
-		}
+		
 	}
 
 	/***************************************************************************
@@ -153,8 +144,8 @@ public class BookServiceImpl implements IBookService {
      ****************************************************************************/
 	
 	@Override
-	public ResponseEntity<BookResponse> updateBookDetails(String bookName, Book updatedBook, String token) {
-		if (verifyUser(token)) {
+	public ResponseEntity<BookResponse> updateBookDetails(String bookName, Book updatedBook) {
+		
 			if (bookdao.getBookByName(updatedBook.getBookName()) != null) {
 				bookdao.updateBook(updatedBook, bookName);
 				return ResponseEntity.status(HttpStatus.ACCEPTED)
@@ -162,9 +153,7 @@ public class BookServiceImpl implements IBookService {
 			} else {
 				throw new BookNotFoundException();
 			}
-		} else {
-			throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
-		}
+		
 	}
 
 	/***************************************************************************
@@ -194,7 +183,7 @@ public class BookServiceImpl implements IBookService {
      ****************************************************************************/
 	
 	 @Override
-	  public void saveBookImage(MultipartFile file,int bookId,String token) {
+	  public void saveBookImage(MultipartFile file,int bookId) {
 	    try {
 	    	byte[] bytes = file.getBytes();
 	    	Path path = Paths.get(UPLOADED_FOLDER + file.getOriginalFilename());

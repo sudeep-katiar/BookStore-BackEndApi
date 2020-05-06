@@ -8,9 +8,9 @@ import com.bookstore.model.Order;
 
 public interface IOrderservice {
 
-	public ResponseEntity<Object> makeOrder(String token,int id,int quantity);
-	public ResponseEntity<Object> cancelOrder(String token,int bookId);
-	public ResponseEntity<Object> getCartList(String token);
-	public ResponseEntity<Object> updateQuantity(String token,Order order) ;
-	public ResponseEntity<Object> confirmOrder(String token,List<Order> order);
+	public ResponseEntity<Object> makeOrder(int id,int quantity);
+	public ResponseEntity<Object> cancelOrder(int bookId);
+	public ResponseEntity<Object> getCartList();
+	public ResponseEntity<Object> updateQuantity(Order order) ;
+	public ResponseEntity<Object> confirmOrder(List<Order> order);
 }
