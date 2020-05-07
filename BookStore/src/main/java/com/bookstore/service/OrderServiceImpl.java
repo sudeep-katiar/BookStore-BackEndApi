@@ -25,10 +25,10 @@ import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.bookstore.dao.BookDaoImpl;
 import com.bookstore.dao.IOrderDAO;
 import com.bookstore.dto.MailResponse;
+import com.bookstore.entity.Book;
+import com.bookstore.entity.Order;
+import com.bookstore.entity.UserData;
 import com.bookstore.exception.InvalidTokenOrExpiredException;
-import com.bookstore.model.Book;
-import com.bookstore.model.Order;
-import com.bookstore.model.UserData;
 import com.bookstore.response.OrderListResponse;
 import com.bookstore.response.OrderResponse;
 import com.bookstore.util.JwtTokenUtil;
@@ -79,19 +79,13 @@ public class OrderServiceImpl implements IOrderservice {
      ********************************************************************/
 	@Override
 	public ResponseEntity<Object> makeOrder(int id, int quantity) {
-		
 			Book book = bookDao.getBookByBookId(id);
-			
 			Order order = new Order();
 			order.setBookId(id);
-			order.setUserId(userData.getUId());
-			order.setQuantity(quantity);
+				order.setQuantity(quantity);
 			order.setBookName(book.getBookName());
 			order.setPrice(book.getPrice());
-			order.setCustomerName(userData.getFirstName());
-			order.setEmail(userData.getEmail());
-			order.setPhNo(userData.getPhNo());
-			order.setTotal(order.getPrice() * order.getQuantity());
+			order.setTotal(order.getPrice()*order.getQuantity());
 			order.setBookImage(book.getBookImage());
 			if (orderDao.addOrder(order) > 0) {
 				book.setQuantity(book.getQuantity()-1);
@@ -110,8 +104,9 @@ public class OrderServiceImpl implements IOrderservice {
      ********************************************************************/
 	@Override
 	public ResponseEntity<Object> getCartList() {
-	
-			Optional<List<Order>> orders = Optional.ofNullable(orderDao.getOrderList(userData.getUId()));
+		Optional<List<Order>> orders=null;
+		
+			orders = Optional.ofNullable(orderDao.getOrderList(1));
 			if (orders.isPresent()) {
 				return ResponseEntity.status(HttpStatus.ACCEPTED)
 						.body(new OrderListResponse(202, "total books in cart" + orders.get().size(), orders.get()));
@@ -137,6 +132,7 @@ public class OrderServiceImpl implements IOrderservice {
 			}
 		
 	}
+	
 	/*********************************************************************
      * To cancel the book order by the user it will remove book from cart.
      * 
