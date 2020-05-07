@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.bookstore.model.Book;
+import com.bookstore.entity.Book;
 import com.bookstore.response.BookResponse;
 import com.bookstore.service.IBookService;
 

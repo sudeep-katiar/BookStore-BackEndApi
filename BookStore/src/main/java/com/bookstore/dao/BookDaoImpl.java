@@ -10,8 +10,8 @@ import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.bookstore.entity.Book;
 import com.bookstore.exception.InternalServerError;
-import com.bookstore.model.Book;
 import com.bookstore.util.HibernateUtil;
 /***************************************************************************************************
  * OrderDAO Implemantaion Class of IBookDao its take Support Of HiberNateUtil Class Which Class Which takes All
