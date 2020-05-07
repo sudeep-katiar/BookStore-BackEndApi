@@ -1,4 +1,4 @@
-package com.bookstore.model;
+package com.bookstore.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -31,7 +31,6 @@ public class Order {
 	private int bookId;
 	
 	@Column
-	@NotNull
 	private int userId;
 	
 	@Column
@@ -49,19 +48,7 @@ public class Order {
 	@Column
 	@NotNull
 	private double total;
-	
-	@Column
-	@NotNull
-	private String customerName;
-	
-	@Column
-	@NotNull	
-	private Long phNo;
-	
-	@Column
-	@NotNull
-	private String email;
-	
+		
 	@Column
 	private String bookImage;
 }

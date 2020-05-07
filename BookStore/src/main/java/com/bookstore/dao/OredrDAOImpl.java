@@ -8,7 +8,7 @@ import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.bookstore.model.Order;
+import com.bookstore.entity.Order;
 import com.bookstore.util.HibernateUtil;
 /***************************************************************************************************
  * OrderDAO Implemantaion Class of iOrderDao its take Support Of HiberNateUtil Class Which Class Which takes All
@@ -107,9 +107,9 @@ public class OredrDAOImpl implements IOrderDAO{
 	@Transactional
 	@Override
 	public List<Order> getOrderList(int userId) {
-		String query="FROM Order where userId=:id";
+		String query="FROM Order";
 		Query<Order> hQuery=hibernateUtil.select(query);
-		hQuery.setParameter("id", userId);
+//		hQuery.setParameter("id", userId);
 		return hQuery.list();
 	}
 	

@@ -2,7 +2,7 @@ package com.bookstore.dao;
 
 import java.util.List;
 
-import com.bookstore.model.Book;
+import com.bookstore.entity.Book;
 import com.bookstore.util.HibernateUtil;
 /***************************************************************************************************
  * BookDAO contract interface.

@@ -2,7 +2,7 @@ package com.bookstore.response;
 
 import java.util.List;
 
-import com.bookstore.model.Order;
+import com.bookstore.entity.Order;
 
 import lombok.Data;
 @Data

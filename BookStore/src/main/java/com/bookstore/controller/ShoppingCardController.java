@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bookstore.model.Order;
+import com.bookstore.entity.Order;
 import com.bookstore.service.IOrderservice;
 /************************************************************************************************************************************************
  * ShoppingCartController By using the object reference of OrderService class This Controller Has fuctionallity to Make Book Order,Update Order ,
@@ -30,6 +30,7 @@ import com.bookstore.service.IOrderservice;
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/orders")
+
 public class ShoppingCardController {
 
 	@Autowired

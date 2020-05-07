@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 
-import com.bookstore.model.Order;
+import com.bookstore.entity.Order;
 
 public interface IOrderservice {
 
