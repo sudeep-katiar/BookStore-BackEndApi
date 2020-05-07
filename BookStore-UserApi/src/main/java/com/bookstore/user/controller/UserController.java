@@ -21,7 +21,6 @@ import com.bookstore.user.service.IUserService;
  * 
  ******************************************************************************************************/
 
-
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/users")
@@ -91,6 +90,5 @@ public class UserController {
 		return ResponseEntity.ok ()
 				.body (new UserResponse ("Addresses are : ", service.getAllAddressOfUser (token)));
 	}
-
 
 }

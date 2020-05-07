@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,25 +42,25 @@ public class BookController {
 	IBookService bookservice;
 	
 	@PostMapping("/add")
-	public ResponseEntity<BookResponse> addBook(@RequestBody Book book){
-		return bookservice.addBook(book);
+	public ResponseEntity<BookResponse> addBook(@RequestBody Book book,@RequestHeader String token){
+		return bookservice.addBook(book,token);
 	}
 	
 	@PutMapping("/update")
-	public ResponseEntity<BookResponse> updateBook(@RequestBody Book book,@RequestParam("bookname") String bookName){
-		return bookservice.updateBookDetails(bookName, book);
+	public ResponseEntity<BookResponse> updateBook(@RequestBody Book book,@RequestParam("bookname") String bookName,@RequestHeader String token){
+		return bookservice.updateBookDetails(bookName, book,token);
 	}
 	
 	@DeleteMapping("/delete")
-	public ResponseEntity<BookResponse> removeBook(@RequestParam("bookId") int bookId){
-		return bookservice.removeBook(bookId);
+	public ResponseEntity<BookResponse> removeBook(@RequestParam("bookId") int bookId,@RequestHeader String token){
+		return bookservice.removeBook(bookId,token);
 	}
 	
 	@PostMapping("/upload")
-	public ResponseEntity<BookResponse> uploadImage(@RequestParam("imageFile") MultipartFile file,@RequestParam("bookId") int  bookId) throws IOException {
+	public ResponseEntity<BookResponse> uploadImage(@RequestParam("imageFile") MultipartFile file,@RequestParam("bookId") int  bookId,@RequestHeader String token) throws IOException {
 		String message = "";
 	    try {
-	      bookservice.saveBookImage(file,bookId);
+	      bookservice.saveBookImage(file,bookId,token);
 	      message = "Uploaded the file successfully: " + file.getOriginalFilename();
 	      return ResponseEntity.status(HttpStatus.OK).body(new BookResponse(202, message));
 	    } catch (Exception e) {
@@ -73,7 +74,7 @@ public class BookController {
 		return bookservice.getAllBooks();
 	}
 	@GetMapping("/sellerBooks")
-	public ResponseEntity<BookResponse> getSellerBooks(){
-		return bookservice.getSellerBooks();
+	public ResponseEntity<BookResponse> getSellerBooks(@RequestHeader String token){
+		return bookservice.getSellerBooks(token);
 	}
 }
