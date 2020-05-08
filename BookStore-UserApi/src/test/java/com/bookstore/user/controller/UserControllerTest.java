@@ -54,7 +54,6 @@ public class UserControllerTest {
 	private static final String REGISTER_USER_URI = "/users/register";
 	private static final String GET_ADDRESSES_URI = "/users/address/get";
 	private static final String ACTIVATE_USER_URI = "/users/activ/{token}";
-
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
@@ -175,6 +174,26 @@ public class UserControllerTest {
 
 		log.info("fetch result : " + fetchedResponse.getStatus());
 		Assert.assertEquals("activate user ", fetchedResponse.getStatus(),
-				202);
+				202); 
 	}
+	
+	@Test
+	public void activate_user_account_test1() throws Exception {
+		User user = new User();
+		user.setEmail("validEmail");
+		ResponseEntity<Object> responseEntity = new ResponseEntity<Object>(HttpStatus.ACCEPTED);
+				
+		objectMapper = new ObjectMapper();
+		String newUserDto = objectMapper.writeValueAsString(user);
+		MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/users/login/{email}","token")
+				.content(newUserDto).header("password", "password").contentType(MediaType.APPLICATION_JSON);
+		Mockito.when(userService.loginUser(Mockito.anyString(),Mockito.anyString())).thenReturn(responseEntity);
+
+		MockHttpServletResponse fetchedResponse = mockMvc.perform(requestBuilder).andReturn().getResponse();
+
+		log.info("fetch result : " + fetchedResponse.getStatus());
+		Assert.assertEquals("activate user ", fetchedResponse.getStatus(),
+				202); 
+	}
+	
 }
