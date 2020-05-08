@@ -2,6 +2,7 @@ package com.bookstore.user.exception;
 
 import java.time.LocalDateTime;
 
+import com.bookstore.user.response.UserResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -14,8 +15,11 @@ import com.bookstore.user.response.CustomErrorResponse;
  * Exception Controller Class For handle all the user exceptions.
  *  
  * @author Rupesh Patil
- * @version 1.0
+ * @version 1.1
  * @created 2020-04-11
+ * @modified 2020-05-05
+ * @updated -> added exception handler for {@link UserNotFoundException}
+ * @author Durgasankar Mishra
  *
  ******************************************************************************************************/
 
@@ -46,6 +50,18 @@ public class UserExceptionController extends ResponseEntityExceptionHandler {
 		errors.setError(ex.getMessage());
 		errors.setStatus(HttpStatus.NOT_FOUND.value());
 		return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
+	}
+
+	/**
+	 * Handles all User not found exceptions if raised during workflow
+	 *
+	 * @param e as {@link UserNotFoundException}
+	 * @return ResponseEntity<UserResponse>
+	 */
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<UserResponse> handelAllNotFoundExceptions( UserNotFoundException e ) {
+		return ResponseEntity.status (HttpStatus.NOT_FOUND)
+				.body (new UserResponse (e.getStatus (), e.getMessage ()));
 	}
 
 }

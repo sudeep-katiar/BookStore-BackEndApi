@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.bookstore.model.Book;
+import com.bookstore.entity.Book;
 
 import lombok.Data;
 

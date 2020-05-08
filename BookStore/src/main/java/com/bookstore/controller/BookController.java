@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import com.bookstore.model.Book;
+
+import com.bookstore.entity.Book;
 import com.bookstore.response.BookResponse;
 import com.bookstore.service.IBookService;
 
@@ -25,8 +26,9 @@ import com.bookstore.service.IBookService;
  * Updated Book,Get BookList And upload book Images functionalites Apis.   
  *
  * @author Rupesh Patil
- * @version 1.0
+ * @version 2.0
  * @created 2020-04-12
+ * @updated 5/06/2020
  * @see {@link IBookService} implementation of all the required services & functionality
  * @see {@link BookResponse} if there is any type of response it will reflect out
  * 
@@ -55,7 +57,7 @@ public class BookController {
 	}
 	
 	@PostMapping("/upload")
-	public ResponseEntity<BookResponse> uploadImage(@RequestParam("imageFile") MultipartFile file,@RequestHeader String token,@RequestParam("bookId") int  bookId) throws IOException {
+	public ResponseEntity<BookResponse> uploadImage(@RequestParam("imageFile") MultipartFile file,@RequestParam("bookId") int  bookId,@RequestHeader String token) throws IOException {
 		String message = "";
 	    try {
 	      bookservice.saveBookImage(file,bookId,token);
@@ -68,8 +70,8 @@ public class BookController {
 	}
 	
 	@GetMapping("/getAllBooks")
-	public ResponseEntity<BookResponse> getAllBooks(@RequestHeader String token){
-		return bookservice.getAllBooks(token);
+	public ResponseEntity<BookResponse> getAllBooks(){
+		return bookservice.getAllBooks();
 	}
 	@GetMapping("/sellerBooks")
 	public ResponseEntity<BookResponse> getSellerBooks(@RequestHeader String token){
