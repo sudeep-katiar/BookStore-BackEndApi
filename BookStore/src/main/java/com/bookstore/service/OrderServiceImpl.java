@@ -25,11 +25,10 @@ import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.bookstore.dao.BookDaoImpl;
 import com.bookstore.dao.IOrderDAO;
 import com.bookstore.dto.MailResponse;
+import com.bookstore.entity.Book;
+import com.bookstore.entity.Order;
+import com.bookstore.entity.UserData;
 import com.bookstore.exception.InvalidTokenOrExpiredException;
-import com.bookstore.exception.UserDoesNotExistException;
-import com.bookstore.model.Book;
-import com.bookstore.model.Order;
-import com.bookstore.model.UserData;
 import com.bookstore.response.OrderListResponse;
 import com.bookstore.response.OrderResponse;
 import com.bookstore.util.JwtTokenUtil;
@@ -45,7 +44,8 @@ import lombok.extern.slf4j.Slf4j;
  * of IBookService Interface methods like Make book Order,delete book Order, Update Book Order,Confirm Order. 
  *
  * @author Rupesh Patil
- * @version 1.0
+ * @version 2.0
+ * @updated 2020-05-06
  * @created 2020-04-15
  * @see {@link IOrderDAO} implementation of all the required DB related functionality
  * @see {@link restTemplate} will Inject Object for communicate two web-apis.
@@ -78,20 +78,14 @@ public class OrderServiceImpl implements IOrderservice {
      * @return ResponseEntity<Object>
      ********************************************************************/
 	@Override
-	public ResponseEntity<Object> makeOrder(String token, int id, int quantity) {
-		if (verifyUser(token)) {
+	public ResponseEntity<Object> makeOrder(int id, int quantity) {
 			Book book = bookDao.getBookByBookId(id);
-			
 			Order order = new Order();
 			order.setBookId(id);
-			order.setUserId(userData.getUId());
-			order.setQuantity(quantity);
+				order.setQuantity(quantity);
 			order.setBookName(book.getBookName());
 			order.setPrice(book.getPrice());
-			order.setCustomerName(userData.getFirstName());
-			order.setEmail(userData.getEmail());
-			order.setPhNo(userData.getPhNo());
-			order.setTotal(order.getPrice() * order.getQuantity());
+			order.setTotal(order.getPrice()*order.getQuantity());
 			order.setBookImage(book.getBookImage());
 			if (orderDao.addOrder(order) > 0) {
 				book.setQuantity(book.getQuantity()-1);
@@ -99,9 +93,7 @@ public class OrderServiceImpl implements IOrderservice {
 				System.out.println("Added successfully");
 				return ResponseEntity.status(HttpStatus.ACCEPTED).body(new OrderResponse(202, "Order Added to cart"));
 			}
-		} else {
-			throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
-		}
+		
 		return null;
 	}
 
@@ -111,9 +103,10 @@ public class OrderServiceImpl implements IOrderservice {
      * @return ResponseEntity<Object>
      ********************************************************************/
 	@Override
-	public ResponseEntity<Object> getCartList(String token) {
-		if (verifyUser(token)) {
-			Optional<List<Order>> orders = Optional.ofNullable(orderDao.getOrderList(userData.getUId()));
+	public ResponseEntity<Object> getCartList() {
+		Optional<List<Order>> orders=null;
+		
+			orders = Optional.ofNullable(orderDao.getOrderList(1));
 			if (orders.isPresent()) {
 				return ResponseEntity.status(HttpStatus.ACCEPTED)
 						.body(new OrderListResponse(202, "total books in cart" + orders.get().size(), orders.get()));
@@ -121,8 +114,6 @@ public class OrderServiceImpl implements IOrderservice {
 				return ResponseEntity.status(HttpStatus.ACCEPTED)
 						.body(new OrderResponse(202, "No any Books Added to cart"));
 			}
-		}
-		throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
 	}
 	/*********************************************************************
      * To update Quantity of books by the user then user can increse or decrease
@@ -131,18 +122,17 @@ public class OrderServiceImpl implements IOrderservice {
      * @return ResponseEntity<Object>
      ********************************************************************/
 	@Override
-	public ResponseEntity<Object> updateQuantity(String token, Order order) {
-		if (verifyUser(token)) {
+	public ResponseEntity<Object> updateQuantity( Order order) {
+		
 			if (orderDao.updateQuantity(order) > 0) {
 				return ResponseEntity.status(HttpStatus.ACCEPTED).body(new OrderResponse(202, "Quantity Updatd"));
 			} else {
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body(new OrderResponse(500, "Error in Updated Quantity"));
 			}
-		} else {
-			throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
-		}
+		
 	}
+	
 	/*********************************************************************
      * To cancel the book order by the user it will remove book from cart.
      * 
@@ -150,8 +140,8 @@ public class OrderServiceImpl implements IOrderservice {
      * @return ResponseEntity<Object>
      ********************************************************************/
 	@Override
-	public ResponseEntity<Object> cancelOrder(String token, int bookId) {
-		if (verifyUser(token)) {
+	public ResponseEntity<Object> cancelOrder(int bookId) {
+		
 			if (orderDao.deleteOrder(bookId) > 0) {
 				return ResponseEntity.status(HttpStatus.ACCEPTED)
 						.body(new OrderResponse(202, "Order Deleted SuccessFully"));
@@ -159,9 +149,7 @@ public class OrderServiceImpl implements IOrderservice {
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body(new OrderResponse(500, "Error in Delete Order"));
 			}
-		} else {
-			throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
-		}
+		 
 	}
 
 	/***************************************************************************
@@ -172,8 +160,8 @@ public class OrderServiceImpl implements IOrderservice {
      * @return ResponseEntity<Object>
      ********************************************************************/
 	@Override
-	public ResponseEntity<Object> confirmOrder(String token, List<Order> order) {
-		if (verifyUser(token)) {
+	public ResponseEntity<Object> confirmOrder( List<Order> order) {
+	
 			MimeMessage message = sender.createMimeMessage();
 			Map<String, Object> model = new HashMap<String, Object>();
 			order.forEach(s->{
@@ -200,9 +188,7 @@ public class OrderServiceImpl implements IOrderservice {
 				System.out.println("Error in message sending");
 				e.printStackTrace();
 			}
-		} else {
-			throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
-		}
+		
 		return null;
 	}
 

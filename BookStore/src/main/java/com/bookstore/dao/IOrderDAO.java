@@ -2,7 +2,7 @@ package com.bookstore.dao;
 
 import java.util.List;
 
-import com.bookstore.model.Order;
+import com.bookstore.entity.Order;
 import com.bookstore.util.HibernateUtil;
 /***************************************************************************************************
  * OrderDAO contract interface.
