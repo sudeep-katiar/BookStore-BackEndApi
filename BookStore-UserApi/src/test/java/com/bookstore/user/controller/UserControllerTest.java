@@ -53,6 +53,7 @@ public class UserControllerTest {
 	private static final String REGISTER_SELLER_URI = "/users/seller-register";
 	private static final String REGISTER_USER_URI = "/users/register";
 	private static final String GET_ADDRESSES_URI = "/users/address/get";
+	private static final String ACTIVATE_USER_URI = "/users/activ/{token}";
 
 	@Before
 	public void setUp() {
@@ -154,9 +155,26 @@ public class UserControllerTest {
 		MockHttpServletResponse fetchedResponse = mockMvc.perform(requestBuilder).andReturn().getResponse();
 
 		log.info("fetch result : " + fetchedResponse.getStatus());
-		Assert.assertEquals("Checking failure scenario of add address", fetchedResponse.getStatus(),
+		Assert.assertEquals("register user with valid user data", fetchedResponse.getStatus(),
 				202);
 	}
 	
-	
+	@Test
+	public void activate_user_account_test() throws Exception {
+		User user = new User();
+		user.setEmail("validEmail");
+		ResponseEntity<UserResponse> responseEntity = ResponseEntity.status(HttpStatus.ACCEPTED)
+				.body(new UserResponse(208, "test" + user.getEmail() + "<=== please verify your email first"));
+		objectMapper = new ObjectMapper();
+		String newUserDto = objectMapper.writeValueAsString(user);
+		MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(ACTIVATE_USER_URI,"token")
+				.content(newUserDto).contentType(MediaType.APPLICATION_JSON);
+		Mockito.when(userService.activateUser(Mockito.any())).thenReturn(responseEntity);
+
+		MockHttpServletResponse fetchedResponse = mockMvc.perform(requestBuilder).andReturn().getResponse();
+
+		log.info("fetch result : " + fetchedResponse.getStatus());
+		Assert.assertEquals("activate user ", fetchedResponse.getStatus(),
+				202);
+	}
 }
