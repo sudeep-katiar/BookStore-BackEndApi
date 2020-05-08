@@ -50,7 +50,8 @@ public class UserControllerTest {
 	private ObjectMapper objectMapper;
 	
 	private static final String ADD_ADDRESS_URI = "/users/address/add";
-	private static final String REGISTER_SELLER = "/users/seller-register";
+	private static final String REGISTER_SELLER_URI = "/users/seller-register";
+	private static final String REGISTER_USER_URI = "/users/register";
 	private static final String GET_ADDRESSES_URI = "/users/address/get";
 
 	@Before
@@ -118,18 +119,16 @@ public class UserControllerTest {
 
 		
 	}
-
+ 
 	@Test
 	public void register_seller_user_with_valid_seller_informations() throws Exception {
 		User user = new User();
 		user.setEmail("hgshjsjcs");
-		UserResponse userResponse = new UserResponse();
-
 		ResponseEntity<UserResponse> responseEntity = ResponseEntity.status(HttpStatus.ACCEPTED)
 				.body(new UserResponse(208, "test" + user.getEmail() + "<=== please verify your email first"));
 		objectMapper = new ObjectMapper();
 		String newUserDto = objectMapper.writeValueAsString(user);
-		MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post(REGISTER_SELLER)
+		MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post(REGISTER_SELLER_URI)
 				.content(newUserDto).contentType(MediaType.APPLICATION_JSON);
 		Mockito.when(userService.register(Mockito.any())).thenReturn(responseEntity);
 
@@ -139,4 +138,25 @@ public class UserControllerTest {
 		Assert.assertEquals("Checking failure scenario of add address", fetchedResponse.getStatus(),
 				202);
 	}
+	
+	@Test
+	public void register_user_with_valid_user_informations() throws Exception {
+		User user = new User();
+		user.setEmail("validEmail");
+		ResponseEntity<UserResponse> responseEntity = ResponseEntity.status(HttpStatus.ACCEPTED)
+				.body(new UserResponse(208, "test" + user.getEmail() + "<=== please verify your email first"));
+		objectMapper = new ObjectMapper();
+		String newUserDto = objectMapper.writeValueAsString(user);
+		MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post(REGISTER_USER_URI)
+				.content(newUserDto).contentType(MediaType.APPLICATION_JSON);
+		Mockito.when(userService.register(Mockito.any())).thenReturn(responseEntity);
+
+		MockHttpServletResponse fetchedResponse = mockMvc.perform(requestBuilder).andReturn().getResponse();
+
+		log.info("fetch result : " + fetchedResponse.getStatus());
+		Assert.assertEquals("Checking failure scenario of add address", fetchedResponse.getStatus(),
+				202);
+	}
+	
+	
 }
