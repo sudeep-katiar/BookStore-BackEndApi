@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -21,7 +22,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.bookstore.user.dto.AddressDto;
+import com.bookstore.user.model.User;
 import com.bookstore.user.model.UserAddress;
+import com.bookstore.user.response.UserResponse;
 import com.bookstore.user.service.IUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -47,55 +50,47 @@ public class UserControllerTest {
 	private ObjectMapper objectMapper;
 	
 	private static final String ADD_ADDRESS_URI = "/users/address/add";
+	private static final String REGISTER_SELLER = "/users/seller-register";
+	private static final String GET_ADDRESSES_URI = "/users/address/get";
 
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
 	}
-	
+
 	@Test
 	public void add_address_test_with_positive_input_value() throws Exception {
 		objectMapper = new ObjectMapper();
 		String addressDto = objectMapper.writeValueAsString(new AddressDto());
-		MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-				.post(ADD_ADDRESS_URI)
-				.content(addressDto)
-				.header("token", "validToken")
-				.contentType(MediaType.APPLICATION_JSON);
-		
-		Mockito.when(userService.isUserAddressAdded(Mockito.any(), Mockito.anyString()))
-				.thenReturn(true);
-	
-		 MockHttpServletResponse fetchedResponse = mockMvc.perform(requestBuilder)
-				.andReturn()
-				.getResponse();
-		 
+		MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post(ADD_ADDRESS_URI).content(addressDto)
+				.header("token", "validToken").contentType(MediaType.APPLICATION_JSON);
+
+		Mockito.when(userService.isUserAddressAdded(Mockito.any(), Mockito.anyString())).thenReturn(true);
+
+		MockHttpServletResponse fetchedResponse = mockMvc.perform(requestBuilder).andReturn().getResponse();
+
 		log.info("fetch result : " + fetchedResponse.getContentAsString());
-		 Assert.assertEquals ("Checking sucessful addition of address", fetchedResponse.getStatus(), HttpStatus.OK.value());
+		Assert.assertEquals("Checking sucessful addition of address", fetchedResponse.getStatus(),
+				HttpStatus.OK.value());
 	}
-	
+
 	@Test
 	public void add_address_test_with_failue() throws Exception {
 		objectMapper = new ObjectMapper();
 		String addressDto = objectMapper.writeValueAsString(new AddressDto());
-		MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-				.post(ADD_ADDRESS_URI)
-				.content(addressDto)
-				.header("token", "validToken")
-				.contentType(MediaType.APPLICATION_JSON);
-		
-		Mockito.when(userService.isUserAddressAdded(Mockito.any(), Mockito.anyString()))
-				.thenReturn(false);
-	
-		 MockHttpServletResponse fetchedResponse = mockMvc.perform(requestBuilder)
-				.andReturn()
-				.getResponse();
-		 
-		 log.info("fetch result : " + fetchedResponse.getContentAsString());
-	     Assert.assertEquals ("Checking failure scenario of add address", fetchedResponse.getStatus(), HttpStatus.BAD_REQUEST.value());
+		MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post(ADD_ADDRESS_URI).content(addressDto)
+				.header("token", "validToken").contentType(MediaType.APPLICATION_JSON);
+
+		Mockito.when(userService.isUserAddressAdded(Mockito.any(), Mockito.anyString())).thenReturn(false);
+
+		MockHttpServletResponse fetchedResponse = mockMvc.perform(requestBuilder).andReturn().getResponse();
+
+		log.info("fetch result : " + fetchedResponse.getContentAsString());
+		Assert.assertEquals("Checking failure scenario of add address", fetchedResponse.getStatus(),
+				HttpStatus.BAD_REQUEST.value());
 	}
-	
+
 	@Test
 	public void get_addresses_test_for_valid_addresses() throws Exception {
 		UserAddress address1 = new UserAddress();
@@ -110,31 +105,38 @@ public class UserControllerTest {
 		addresses.add(address1);
 		addresses.add(address2);
 		log.info("created addresses : " + addresses.toString());
-		String getAddressesUrl = "/users/address/get";
-			MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-				.get(getAddressesUrl)
-				.header("token", "validToken")
-				.contentType(MediaType.APPLICATION_JSON);
-		
+
+		MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(GET_ADDRESSES_URI)
+				.header("token", "validToken").contentType(MediaType.APPLICATION_JSON);
+
 		Mockito.when(userService.getAllAddressOfUser(Mockito.anyString())).thenReturn(addresses);
-	
-		 MockHttpServletResponse fetchedResponse = mockMvc.perform(requestBuilder)
-				.andReturn()
-				.getResponse();
-		 
-		 log.info("fetch result : " + fetchedResponse.getContentAsString());
-	     Assert.assertEquals ("all Addresses : ", fetchedResponse.getStatus(), HttpStatus.OK.value());
-	     
-	     List<UserAddress> fetchAddresses = userService.getAllAddressOfUser(Mockito.anyString());
-	     Assert.assertTrue ("is Data fetched in response is matching with exert value: ", fetchAddresses.size() == 2);
-	     Assert.assertFalse ("checking with false condition of fetched data size: ", fetchAddresses.size() == 1);
-	     
-	    String fetchedCountryName = fetchAddresses.stream()
-	     		.filter(address -> address.getPinCode() == 756045)
-	     		.findFirst()
-	     		.get()
-	     		.getCountry();
-	     Assert.assertEquals ("checking with value inside response: ", fetchedCountryName, "India");
-		    
+
+		MockHttpServletResponse fetchedResponse = mockMvc.perform(requestBuilder).andReturn().getResponse();
+
+		log.info("fetch result : " + fetchedResponse.getContentAsString());
+		Assert.assertEquals("all Addresses : ", fetchedResponse.getStatus(), HttpStatus.OK.value());
+
+		
+	}
+
+	@Test
+	public void register_seller_user_with_valid_seller_informations() throws Exception {
+		User user = new User();
+		user.setEmail("hgshjsjcs");
+		UserResponse userResponse = new UserResponse();
+
+		ResponseEntity<UserResponse> responseEntity = ResponseEntity.status(HttpStatus.ACCEPTED)
+				.body(new UserResponse(208, "test" + user.getEmail() + "<=== please verify your email first"));
+		objectMapper = new ObjectMapper();
+		String newUserDto = objectMapper.writeValueAsString(user);
+		MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post(REGISTER_SELLER)
+				.content(newUserDto).contentType(MediaType.APPLICATION_JSON);
+		Mockito.when(userService.register(Mockito.any())).thenReturn(responseEntity);
+
+		MockHttpServletResponse fetchedResponse = mockMvc.perform(requestBuilder).andReturn().getResponse();
+
+		log.info("fetch result : " + fetchedResponse.getStatus());
+		Assert.assertEquals("Checking failure scenario of add address", fetchedResponse.getStatus(),
+				202);
 	}
 }
