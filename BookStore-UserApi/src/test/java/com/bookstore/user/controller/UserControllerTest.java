@@ -21,6 +21,8 @@ import com.bookstore.user.dto.AddressDto;
 import com.bookstore.user.service.IUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * User controller test cases
  * 
@@ -30,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @see {@link UserController} user controller
  */
 @RunWith(MockitoJUnitRunner.class)
+@Slf4j
 public class UserControllerTest {
 
 	@InjectMocks
@@ -38,6 +41,8 @@ public class UserControllerTest {
 	private IUserService userService;
 	private MockMvc mockMvc;
 	private ObjectMapper objectMapper;
+	
+	private static final String ADD_ADDRESS_URI = "/users/address/add";
 
 	@Before
 	public void setUp() {
@@ -47,11 +52,10 @@ public class UserControllerTest {
 	
 	@Test
 	public void add_address_test_with_positive_input_value() throws Exception {
-		String addAddressUri = "/users/address/add";
 		objectMapper = new ObjectMapper();
 		String addressDto = objectMapper.writeValueAsString(new AddressDto());
 		MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-				.post(addAddressUri)
+				.post(ADD_ADDRESS_URI)
 				.content(addressDto)
 				.header("token", "validToken")
 				.contentType(MediaType.APPLICATION_JSON);
@@ -63,7 +67,28 @@ public class UserControllerTest {
 				.andReturn()
 				.getResponse();
 		 
-		System.out.println("fetch result : " + fetchedResponse.getContentAsString());
+		log.info("fetch result : " + fetchedResponse.getContentAsString());
 		 Assert.assertEquals ("Checking sucessful addition of address", fetchedResponse.getStatus(), HttpStatus.OK.value());
+	}
+	
+	@Test
+	public void add_address_test_with_failue() throws Exception {
+		objectMapper = new ObjectMapper();
+		String addressDto = objectMapper.writeValueAsString(new AddressDto());
+		MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+				.post(ADD_ADDRESS_URI)
+				.content(addressDto)
+				.header("token", "validToken")
+				.contentType(MediaType.APPLICATION_JSON);
+		
+		Mockito.when(userService.isUserAddressAdded(Mockito.any(), Mockito.anyString()))
+				.thenReturn(false);
+	
+		 MockHttpServletResponse fetchedResponse = mockMvc.perform(requestBuilder)
+				.andReturn()
+				.getResponse();
+		 
+		 log.info("fetch result : " + fetchedResponse.getContentAsString());
+	     Assert.assertEquals ("Checking failure scenario of add address", fetchedResponse.getStatus(), HttpStatus.BAD_REQUEST.value());
 	}
 }
