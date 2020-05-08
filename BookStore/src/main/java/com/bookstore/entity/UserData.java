@@ -1,4 +1,4 @@
-package com.bookstore.model;
+package com.bookstore.entity;
 
 import org.springframework.stereotype.Component;
 
