@@ -78,11 +78,12 @@ public class OrderServiceImpl implements IOrderservice {
      * @return ResponseEntity<Object>
      ********************************************************************/
 	@Override
-	public ResponseEntity<Object> makeOrder(int id, int quantity) {
+	public ResponseEntity<Object> makeOrder(int id, int quantity,int userId) {
 			Book book = bookDao.getBookByBookId(id);
 			Order order = new Order();
 			order.setBookId(id);
-				order.setQuantity(quantity);
+			order.setUserId(userId);
+			order.setQuantity(quantity);
 			order.setBookName(book.getBookName());
 			order.setPrice(book.getPrice());
 			order.setTotal(order.getPrice()*order.getQuantity());
@@ -97,16 +98,36 @@ public class OrderServiceImpl implements IOrderservice {
 		return null;
 	}
 
+	public ResponseEntity<Object> makeOrderWithToken(int id,int quantity,String token){
+		Book book = bookDao.getBookByBookId(id);
+		Order order = new Order();
+		order.setBookId(id);
+		order.setUserId(generateToken.parseToken(token));
+		order.setQuantity(quantity);
+		order.setBookName(book.getBookName());
+		order.setPrice(book.getPrice());
+		order.setTotal(order.getPrice()*order.getQuantity());
+		order.setBookImage(book.getBookImage());
+		if (orderDao.addOrder(order) > 0) {
+			book.setQuantity(book.getQuantity()-1);
+			bookDao.updateBook(book, book.getBookName());
+			System.out.println("Added successfully");
+			return ResponseEntity.status(HttpStatus.ACCEPTED).body(new OrderResponse(202, "Order Added to cart"));
+		}
+	
+	return null;
+	}
+
 	/*********************************************************************
      * To get List Of Book from the Order list db table.  
      * @param String token
      * @return ResponseEntity<Object>
      ********************************************************************/
 	@Override
-	public ResponseEntity<Object> getCartList() {
+	public ResponseEntity<Object> getCartList(int userId) {
 		Optional<List<Order>> orders=null;
 		
-			orders = Optional.ofNullable(orderDao.getOrderList(1));
+			orders = Optional.ofNullable(orderDao.getOrderList(userId));
 			if (orders.isPresent()) {
 				return ResponseEntity.status(HttpStatus.ACCEPTED)
 						.body(new OrderListResponse(202, "total books in cart" + orders.get().size(), orders.get()));
@@ -115,6 +136,21 @@ public class OrderServiceImpl implements IOrderservice {
 						.body(new OrderResponse(202, "No any Books Added to cart"));
 			}
 	}
+	
+	public ResponseEntity<Object> getCartListWithToken(String token){
+		Optional<List<Order>> orders=null;
+		
+		orders = Optional.ofNullable(orderDao.getOrderList(generateToken.parseToken(token)));
+		if (orders.isPresent()) {
+			return ResponseEntity.status(HttpStatus.ACCEPTED)
+					.body(new OrderListResponse(202, "total books in cart" + orders.get().size(), orders.get()));
+		} else {
+			return ResponseEntity.status(HttpStatus.ACCEPTED)
+					.body(new OrderResponse(202, "No any Books Added to cart"));
+		}
+		
+	}
+
 	/*********************************************************************
      * To update Quantity of books by the user then user can increse or decrease
      * Quantity for purchase books.  
