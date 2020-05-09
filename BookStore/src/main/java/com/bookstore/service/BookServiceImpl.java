@@ -17,12 +17,12 @@ import com.auth0.jwt.exceptions.AlgorithmMismatchException;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.bookstore.dao.IBookDAO;
+import com.bookstore.entity.Book;
+import com.bookstore.entity.UserData;
 import com.bookstore.exception.BookAlreadyExist;
 import com.bookstore.exception.BookNotFoundException;
 import com.bookstore.exception.InvalidTokenOrExpiredException;
 import com.bookstore.exception.UserDoesNotExistException;
-import com.bookstore.model.Book;
-import com.bookstore.model.UserData;
 import com.bookstore.response.BookResponse;
 import com.bookstore.util.JwtTokenUtil;
 

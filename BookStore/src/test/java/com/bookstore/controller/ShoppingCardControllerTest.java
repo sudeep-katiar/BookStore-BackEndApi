@@ -1,4 +1,4 @@
-package com.bookstore;
+package com.bookstore.controller;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.bookstore.controller.ShoppingCardController;
-import com.bookstore.model.Order;
+import com.bookstore.entity.Order;
 import com.bookstore.service.IOrderservice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

@@ -10,7 +10,7 @@ import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.bookstore.model.Book;
+import com.bookstore.entity.Book;
 
 @Component
 @SuppressWarnings("unchecked")
