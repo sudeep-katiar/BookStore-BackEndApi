@@ -13,5 +13,5 @@ public interface IOrderservice {
 	public ResponseEntity<Object> getCartList(int userId);
 	public ResponseEntity<Object> getCartListWithToken(String token);
 	public ResponseEntity<Object> updateQuantity(Order order) ;
-	public ResponseEntity<Object> confirmOrder(List<Order> order);
+	public ResponseEntity<Object> confirmOrder(String token,List<Order> order);
 }

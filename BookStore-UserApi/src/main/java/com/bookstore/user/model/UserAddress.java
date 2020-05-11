@@ -36,4 +36,10 @@ public class UserAddress {
     @Column(name = "PIN_CODE", nullable = false)
     @NotBlank(message = "Pin code is mandatory")
     private int pinCode;
+    @Column(length = 25, name = "CUSTOMER_NAME")
+    private String customerName;
+    @Column(length = 25, name = "CONTACT")
+    private String contact;
+    @Column(length = 25, name = "ADDRESS_TYPE")
+    private String type;
 }

@@ -18,4 +18,7 @@ public class AddressDto {
     private String state;
     private String country;
     private int pinCode;
+    private String customerName;
+    private String contact;
+    private String type;
 }
