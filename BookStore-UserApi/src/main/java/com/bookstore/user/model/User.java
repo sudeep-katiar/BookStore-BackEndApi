@@ -81,6 +81,4 @@ public class User {
 	@JoinColumn(name = "u_id")
 	private List<UserAddress> addresses;
 
-
-
 }

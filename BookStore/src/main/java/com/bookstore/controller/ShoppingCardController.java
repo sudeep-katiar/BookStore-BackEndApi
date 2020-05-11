@@ -66,8 +66,8 @@ public class ShoppingCardController {
 	}
 	
 	@PutMapping("/confirm-order")
-	public ResponseEntity<Object> confirmOrder(@RequestBody List<Order> order) {
-		return orderService.confirmOrder(order);
+	public ResponseEntity<Object> confirmOrder(@RequestBody List<Order> order,@RequestHeader String token) {
+		return orderService.confirmOrder(token,order);
 	}
 	
 }

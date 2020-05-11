@@ -8,6 +8,7 @@ import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.bookstore.entity.Cart;
 import com.bookstore.entity.Order;
 import com.bookstore.util.HibernateUtil;
 
@@ -26,7 +27,8 @@ import com.bookstore.util.HibernateUtil;
 public class OredrDAOImpl implements IOrderDAO {
 	@Autowired
 	HibernateUtil<Order> hibernateUtil;
-
+	@Autowired
+	HibernateUtil<Cart> cartHibernateUtil; 
 	/**
 	 * To add new order data in order table in DB.
 	 * 
@@ -120,5 +122,9 @@ public class OredrDAOImpl implements IOrderDAO {
 		Query<Order> hQuery = hibernateUtil.select(query);
 		hQuery.setParameter("id", userId);
 		return hQuery.list();
+	}
+	
+	public void saveOrderDetails(Cart orders) {
+		cartHibernateUtil.save(orders);
 	}
 }

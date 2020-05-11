@@ -26,9 +26,11 @@ import com.bookstore.dao.BookDaoImpl;
 import com.bookstore.dao.IOrderDAO;
 import com.bookstore.dto.MailResponse;
 import com.bookstore.entity.Book;
+import com.bookstore.entity.Cart;
 import com.bookstore.entity.Order;
 import com.bookstore.entity.UserData;
 import com.bookstore.exception.InvalidTokenOrExpiredException;
+import com.bookstore.exception.UserDoesNotExistException;
 import com.bookstore.response.OrderListResponse;
 import com.bookstore.response.OrderResponse;
 import com.bookstore.util.JwtTokenUtil;
@@ -196,8 +198,8 @@ public class OrderServiceImpl implements IOrderservice {
      * @return ResponseEntity<Object>
      ********************************************************************/
 	@Override
-	public ResponseEntity<Object> confirmOrder( List<Order> order) {
-	
+	public ResponseEntity<Object> confirmOrder(String token, List<Order> order) {
+		if (verifyUser(token)) {
 			MimeMessage message = sender.createMimeMessage();
 			Map<String, Object> model = new HashMap<String, Object>();
 			order.forEach(s->{
@@ -205,7 +207,6 @@ public class OrderServiceImpl implements IOrderservice {
 				temp =s.getTotal();
 				finalAmount +=temp;
 			});
-			
 			model.put("name",userData.getFirstName());
 			model.put("total", finalAmount);
 			try {
@@ -217,13 +218,22 @@ public class OrderServiceImpl implements IOrderservice {
 				helper.setText(html, true);
 				helper.setSubject("BookStore Order Summery");
 				helper.setFrom("pati.rupesh990@gmail.com");
-				sender.send(message);
-				orderDao.removeAllOrder(userData.getUId());
+//				sender.send(message);
+				Cart confirmOrder=new Cart();
+				confirmOrder.setOrders(order);
+				order.stream().forEachOrdered(p->{
+					confirmOrder.setFinalAmount(confirmOrder.getFinalAmount()+p.getTotal());
+				});
+				orderDao.saveOrderDetails(confirmOrder);
+//				orderDao.removeAllOrder(userData.getUId());
 				return ResponseEntity.status(HttpStatus.ACCEPTED).body(new MailResponse("Mail Sent", "202"));
 			} catch (MessagingException | IOException | TemplateException e) {
 				System.out.println("Error in message sending");
 				e.printStackTrace();
 			}
+		}else {
+			throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
+		}
 		
 		return null;
 	}
