@@ -37,35 +37,35 @@ public class ShoppingCardController {
 	@Autowired
 	IOrderservice orderService;
 	
-	@PostMapping("/make-order")
+	@PostMapping("/{bookId}")
 	public ResponseEntity<Object> addOrder(@RequestParam("bookId") int id,@RequestParam("qty") int quantity,@RequestParam("userId") int userId){
 		return orderService.makeOrder(id,quantity,userId);
 	}
-	@PostMapping("/make-user-order")
+	@PostMapping("/user/{bookId}")
 	public ResponseEntity<Object> addOrderWithLogin(@RequestParam("bookId") int id,@RequestParam("qty") int quantity,@RequestHeader String token){
 		return orderService.makeOrderWithToken(id,quantity,token);
 	}
 	
-	@DeleteMapping("/remove-order")
+	@DeleteMapping("/{bookId}")
 	public ResponseEntity<Object> removeOrder(@RequestParam("bookId") int id){
 		return orderService.cancelOrder(id);
 	}
 	
-	@GetMapping("/cart-list")
+	@GetMapping("/cart")
 	public ResponseEntity<Object> getCartList(@RequestParam("userId") int userId){
 		return orderService.getCartList(userId);
 	}
-	@GetMapping("/user-cart-list")
+	@GetMapping("/user-cart")
 	public ResponseEntity<Object> getCartListOfUser(@RequestHeader String token){
 		return orderService.getCartListWithToken(token);
 	}
-	@PutMapping("/update-quantity")
+	@PutMapping()
 	public ResponseEntity<Object> updateBookQuantity(@RequestBody Order order){
 		System.out.println(order.getQuantity());
 		return orderService.updateQuantity(order);
 	}
 	
-	@PutMapping("/confirm-order")
+	@PutMapping("/confirm")
 	public ResponseEntity<Object> confirmOrder(@RequestBody List<Order> order,@RequestHeader String token) {
 		return orderService.confirmOrder(token,order);
 	}

@@ -30,20 +30,20 @@ public class UserController {
 	IUserService service;
 	/**
 	 * */
-	@PostMapping("/register")
+	@PostMapping("")
 	public ResponseEntity<UserResponse> registerUser(@RequestBody User user){
 		user.setSeller(false);
 		return service.register(user);
 	}
 	
-	@PostMapping("/seller-register")
+	@PostMapping("/seller")
 	public ResponseEntity<UserResponse> sellerRegister(@RequestBody User user){
 		user.setSeller(true);
 		return service.register(user);
 	}
 	
 	
-	@PutMapping("/activ/{token}")
+	@PutMapping("/activate/{token}")
 	public ResponseEntity<UserResponse> activateUserAccount(@PathVariable("token")String token){
 		return service.activateUser(token);
 	}
@@ -63,7 +63,7 @@ public class UserController {
 		return service.getUserByID(token);
 	}
 
-	@PostMapping("/address/add")
+	@PostMapping("/address")
 	public ResponseEntity<UserResponse> addAddressOfUser
 			( @RequestBody final AddressDto addressDto, @RequestHeader("token") final String token ) {
 		boolean isAddressAdded = service.isUserAddressAdded (addressDto, token);
@@ -85,7 +85,7 @@ public class UserController {
 				.body (new UserResponse (400, "Oops...Error removing address!"));
 	}
 
-	@GetMapping("/address/get")
+	@GetMapping("/address")
 	public ResponseEntity<UserResponse> getAllAddresses( @RequestHeader("token") final String token ) {
 		return ResponseEntity.ok ()
 				.body (new UserResponse ("Addresses are : ", service.getAllAddressOfUser (token)));
