@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,11 +39,11 @@ public class ShoppingCardController {
 	IOrderservice orderService;
 	
 	@PostMapping("/{bookId}")
-	public ResponseEntity<Object> addOrder(@RequestParam("bookId") int id,@RequestParam("qty") int quantity,@RequestParam("userId") int userId){
+	public ResponseEntity<Object> addOrder(@PathVariable("bookId") int id,@RequestParam("qty") int quantity,@RequestParam("userId") int userId){
 		return orderService.makeOrder(id,quantity,userId);
 	}
 	@PostMapping("/user/{bookId}")
-	public ResponseEntity<Object> addOrderWithLogin(@RequestParam("bookId") int id,@RequestParam("qty") int quantity,@RequestHeader String token){
+	public ResponseEntity<Object> addOrderWithLogin(@PathVariable("bookId") int id,@RequestParam("qty") int quantity,@RequestHeader String token){
 		return orderService.makeOrderWithToken(id,quantity,token);
 	}
 	
