@@ -41,17 +41,17 @@ public class BookController {
 	@Autowired
 	IBookService bookservice;
 	
-	@PostMapping("/add")
+	@PostMapping()
 	public ResponseEntity<BookResponse> addBook(@RequestBody Book book,@RequestHeader String token){
 		return bookservice.addBook(book,token);
 	}
 	
-	@PutMapping("/update")
+	@PutMapping("/{bookname}")
 	public ResponseEntity<BookResponse> updateBook(@RequestBody Book book,@RequestParam("bookname") String bookName,@RequestHeader String token){
 		return bookservice.updateBookDetails(bookName, book,token);
 	}
 	
-	@DeleteMapping("/delete")
+	@DeleteMapping("/{bookId}")
 	public ResponseEntity<BookResponse> removeBook(@RequestParam("bookId") int bookId,@RequestHeader String token){
 		return bookservice.removeBook(bookId,token);
 	}
@@ -69,11 +69,12 @@ public class BookController {
 	    }
 	}
 	
-	@GetMapping("/getAllBooks")
+	@GetMapping()
 	public ResponseEntity<BookResponse> getAllBooks(){
 		return bookservice.getAllBooks();
 	}
-	@GetMapping("/sellerBooks")
+	
+	@GetMapping("/seller")
 	public ResponseEntity<BookResponse> getSellerBooks(@RequestHeader String token){
 		return bookservice.getSellerBooks(token);
 	}

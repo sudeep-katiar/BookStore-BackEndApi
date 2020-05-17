@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,28 +37,37 @@ public class ShoppingCardController {
 	@Autowired
 	IOrderservice orderService;
 	
-	@PostMapping("/make-order")
-	public ResponseEntity<Object> addOrder(@RequestParam("bookId") int id,@RequestParam("qty") int quantity){
-		return orderService.makeOrder(id,quantity);
+	@PostMapping("/{bookId}")
+	public ResponseEntity<Object> addOrder(@RequestParam("bookId") int id,@RequestParam("qty") int quantity,@RequestParam("userId") int userId){
+		return orderService.makeOrder(id,quantity,userId);
 	}
-	@DeleteMapping("/remove-order")
-	public ResponseEntity<Object> removeOrder(@RequestParam("bookId") int id){
-		return orderService.cancelOrder( id);
+	@PostMapping("/user/{bookId}")
+	public ResponseEntity<Object> addOrderWithLogin(@RequestParam("bookId") int id,@RequestParam("qty") int quantity,@RequestHeader String token){
+		return orderService.makeOrderWithToken(id,quantity,token);
 	}
 	
-	@GetMapping("/cart-list")
-	public ResponseEntity<Object> getCartList(){
-		return orderService.getCartList();
+	@DeleteMapping("/{bookId}")
+	public ResponseEntity<Object> removeOrder(@RequestParam("bookId") int id){
+		return orderService.cancelOrder(id);
 	}
-	@PutMapping("/update-quantity")
+	
+	@GetMapping("/cart")
+	public ResponseEntity<Object> getCartList(@RequestParam("userId") int userId){
+		return orderService.getCartList(userId);
+	}
+	@GetMapping("/user-cart")
+	public ResponseEntity<Object> getCartListOfUser(@RequestHeader String token){
+		return orderService.getCartListWithToken(token);
+	}
+	@PutMapping()
 	public ResponseEntity<Object> updateBookQuantity(@RequestBody Order order){
 		System.out.println(order.getQuantity());
 		return orderService.updateQuantity(order);
 	}
 	
-	@PutMapping("/confirm-order")
-	public ResponseEntity<Object> confirmOrder(@RequestBody List<Order> order) {
-		return orderService.confirmOrder(order);
+	@PutMapping("/confirm")
+	public ResponseEntity<Object> confirmOrder(@RequestBody List<Order> order,@RequestHeader String token) {
+		return orderService.confirmOrder(token,order);
 	}
 	
 }

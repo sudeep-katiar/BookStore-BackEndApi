@@ -2,6 +2,7 @@ package com.bookstore.dao;
 
 import java.util.List;
 
+import com.bookstore.entity.Cart;
 import com.bookstore.entity.Order;
 import com.bookstore.util.HibernateUtil;
 /***************************************************************************************************
@@ -22,5 +23,6 @@ public interface IOrderDAO {
 	public List<Order> getOrderList(int userId);
 	public int updateQuantity(Order order);
 	public int removeAllOrder(int userId);
+	public void saveOrderDetails(Cart orders);
 
 }

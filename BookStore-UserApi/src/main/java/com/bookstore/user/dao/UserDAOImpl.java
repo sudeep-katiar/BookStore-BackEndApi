@@ -85,12 +85,14 @@ public class UserDAOImpl implements IUserDAO {
      */
 	@Override
 	public User getUser(String email) {
+
 		try {
 			String query = "FROM User where email=:eml OR userName=:uname";
 			Query<User> hquery = hibernateUtil.createQuery(query);
 			hquery.setParameter("eml", email);
 			hquery.setParameter("uname", email);
 			return hquery.getSingleResult();
+			
 		} catch (NoResultException e) {
 			return null;
 		}
