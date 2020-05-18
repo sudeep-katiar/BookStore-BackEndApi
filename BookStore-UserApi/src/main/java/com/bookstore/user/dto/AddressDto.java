@@ -1,5 +1,8 @@
 package com.bookstore.user.dto;
 
+import javax.persistence.Column;
+import javax.validation.constraints.NotBlank;
+
 import lombok.Data;
 
 /**
@@ -12,13 +15,15 @@ import lombok.Data;
 @Data
 public class AddressDto {
 
-    private String street;
-    private String town;
-    private String district;
-    private String state;
-    private String country;
-    private int pinCode;
-    private String customerName;
-    private String contact;
-    private String type;
+	private long addressId;
+	private String locality;
+	private String address;
+	private String city;
+	private String landMark;
+	private String country;
+
+	private int pinCode;
+	private String customerName;
+	private String contact;
+	private String type;
 }

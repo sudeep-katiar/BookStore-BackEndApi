@@ -22,14 +22,14 @@ public class UserAddress {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ADDRESS_ID")
     private long addressId;
-    @Column(length = 25, name = "STREET")
-    private String street;
-    @Column(length = 25, name = "TOWN")
-    private String town;
-    @Column(length = 25, name = "DISTRICT")
-    private String district;
-    @Column(length = 25, name = "STATE")
-    private String state;
+    @Column(length = 25, name = "LOCALITY")
+    private String locality;
+    @Column(length = 25, name = "ADDRESS")
+    private String address;
+    @Column( name = "CITY")
+    private String city;
+    @Column(length = 25, name = "LANDMARK")
+    private String landMark;
     @Column(length = 25, name = "COUNTRY")
     @NotBlank(message = "Country name is mandatory")
     private String country;
