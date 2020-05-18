@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,18 +42,18 @@ public class BookController {
 	@Autowired
 	IBookService bookservice;
 	
-	@PostMapping("/add")
+	@PostMapping()
 	public ResponseEntity<BookResponse> addBook(@RequestBody Book book,@RequestHeader String token){
 		return bookservice.addBook(book,token);
 	}
 	
-	@PutMapping("/update")
+	@PutMapping("/{bookname}")
 	public ResponseEntity<BookResponse> updateBook(@RequestBody Book book,@RequestParam("bookname") String bookName,@RequestHeader String token){
 		return bookservice.updateBookDetails(bookName, book,token);
 	}
 	
-	@DeleteMapping("/delete")
-	public ResponseEntity<BookResponse> removeBook(@RequestParam("bookId") int bookId,@RequestHeader String token){
+	@DeleteMapping("/{bookId}")
+	public ResponseEntity<BookResponse> removeBook(@PathVariable("bookId") int bookId,@RequestHeader String token){
 		return bookservice.removeBook(bookId,token);
 	}
 	
@@ -69,12 +70,12 @@ public class BookController {
 	    }
 	}
 	
-	@GetMapping("/getAllBooks")
+	@GetMapping()
 	public ResponseEntity<BookResponse> getAllBooks(){
 		return bookservice.getAllBooks();
 	}
 	
-	@GetMapping("/sellerBooks")
+	@GetMapping("/seller")
 	public ResponseEntity<BookResponse> getSellerBooks(@RequestHeader String token){
 		return bookservice.getSellerBooks(token);
 	}
