@@ -225,7 +225,7 @@ public class OrderServiceImpl implements IOrderservice {
 					confirmOrder.setFinalAmount(confirmOrder.getFinalAmount()+p.getTotal());
 				});
 				orderDao.saveOrderDetails(confirmOrder);
-//				orderDao.removeAllOrder(userData.getUId());
+				orderDao.removeAllOrder(userData.getUId());
 				return ResponseEntity.status(HttpStatus.ACCEPTED).body(new MailResponse("Mail Sent", "202"));
 			} catch (MessagingException | IOException | TemplateException e) {
 				System.out.println("Error in message sending");
