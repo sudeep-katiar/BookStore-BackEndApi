@@ -48,7 +48,7 @@ public class ShoppingCardController {
 	}
 	
 	@DeleteMapping("/{bookId}")
-	public ResponseEntity<Object> removeOrder(@RequestParam("bookId") int id){
+	public ResponseEntity<Object> removeOrder(@PathVariable("bookId") int id){
 		return orderService.cancelOrder(id);
 	}
 	
