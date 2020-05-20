@@ -37,6 +37,10 @@ public class Wishlist {
 	
 	@Column
 	@NotNull
+	private int quantity;
+	
+	@Column
+	@NotNull
 	private String bookName;
 	
 	@Column

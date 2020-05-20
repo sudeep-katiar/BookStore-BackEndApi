@@ -45,6 +45,7 @@ public class WishlistServiceImpl implements IWishlistService {
 			wishlist.setBookId(id);
 			wishlist.setUserId(userId);
 			wishlist.setBookName(book.getBookName());
+			wishlist.setQuantity(book.getQuantity());
 			wishlist.setPrice(book.getPrice());
 			wishlist.setBookImage(book.getBookImage());
 			wishlistDao.save(wishlist);
@@ -71,6 +72,7 @@ public class WishlistServiceImpl implements IWishlistService {
 			wishlist.setBookId(id);
 			wishlist.setUserId(generateToken.parseToken(token));
 			wishlist.setBookName(book.getBookName());
+			wishlist.setQuantity(book.getQuantity());
 			wishlist.setPrice(book.getPrice());
 			wishlist.setBookImage(book.getBookImage());
 			wishlistDao.save(wishlist);
