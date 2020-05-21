@@ -123,6 +123,7 @@ public class UserServiceImpl implements IUserService {
 	@Override
 	public ResponseEntity<Object> loginUser(String email, String password) {
 		Optional<User> user = Optional.ofNullable(userDao.getUser(email));
+		if(user.isPresent()) {
 		if (user.get().isActivate()) {
 			if (user.isPresent() && passwordEncryption.passwordEncoder().matches(password, user.get().getPassword())) {
 				return ResponseEntity.status(HttpStatus.ACCEPTED)
@@ -134,6 +135,9 @@ public class UserServiceImpl implements IUserService {
 		} else {
 			throw new AuthenticationFailedException("Please Verify Email Before Login", HttpStatus.BAD_REQUEST);
 		}
+		}else {
+			throw new AuthenticationFailedException("User Does Not Exist Please Reister", HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	/**
@@ -144,6 +148,8 @@ public class UserServiceImpl implements IUserService {
 	
 	public ResponseEntity<Object> loginAdmin(String email, String password) {
 		Optional<User> user = Optional.ofNullable(userDao.getUser(email));
+		if(user.isPresent()) {
+
 		if (user.get().isActivate()) {
 			if (user.isPresent() && user.get().isSeller()&&passwordEncryption.passwordEncoder().matches(password, user.get().getPassword())) {
 				return ResponseEntity.status(HttpStatus.ACCEPTED)
@@ -155,6 +161,10 @@ public class UserServiceImpl implements IUserService {
 		} else {
 			throw new AuthenticationFailedException("Please Verify Email Before Login", HttpStatus.BAD_REQUEST);
 		}
+		}else {
+			throw new AuthenticationFailedException("User Does Not Exist Please Reister", HttpStatus.BAD_REQUEST);
+		}
+
 	}
 
 	/**

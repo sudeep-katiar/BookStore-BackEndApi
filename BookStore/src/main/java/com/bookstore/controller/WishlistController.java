@@ -99,8 +99,7 @@ public ResponseEntity<WishlistResponse> remove(@RequestHeader("userId") int user
 	@ApiOperation(value = "Api to remove books from wishlist with token", response = WishlistResponse.class)
 	public ResponseEntity<WishlistResponse> removeWishlist(@RequestParam("token") String token, @PathVariable("bookId") int id) {
 		
-		return wishlistService.removeFromWishlist(token, id);
-		
+		return wishlistService.removeFromWishlist(token, id);		
 	}
 
 }
