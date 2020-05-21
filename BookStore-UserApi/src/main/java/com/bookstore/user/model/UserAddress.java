@@ -18,6 +18,7 @@ import javax.validation.constraints.NotBlank;
 @Table(name = "users_addresses")
 @Entity
 public class UserAddress {
+
 	 @Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    @Column(name = "ADDRESS_ID")
