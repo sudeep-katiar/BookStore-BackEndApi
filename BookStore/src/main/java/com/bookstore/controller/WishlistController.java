@@ -62,7 +62,7 @@ public class WishlistController {
 	/*
 	 * API to get all books of wishlist
 	 */
-	@GetMapping("/wishlist")
+	@GetMapping("/allWishlist")
 	@ApiOperation(value = "Api to get all books added to wishlist", response = WishlistResponse.class)
 	public ResponseEntity<WishlistResponse> getWishList(@RequestParam("userId") int userId) {
 		
@@ -86,19 +86,18 @@ public class WishlistController {
 	 */
 	@DeleteMapping("/{bookId}")
 	@ApiOperation(value = "Api to remove books from wishlist", response = WishlistResponse.class)
-public ResponseEntity<WishlistResponse> remove(@RequestParam("userId") int userId, @RequestParam("bookId") int id) {
+public ResponseEntity<WishlistResponse> remove(@RequestHeader("userId") int userId, @PathVariable("bookId") int id) {
 		
 		return wishlistService.removeWishlist(userId, id);
 		
 	}
-	
 	
 	/*
 	 * API to remove book from wishlist with token
 	 */
 	@DeleteMapping("/user-remove/{bookId}")
 	@ApiOperation(value = "Api to remove books from wishlist with token", response = WishlistResponse.class)
-	public ResponseEntity<WishlistResponse> removeWishlist(@RequestParam("token") String token, @RequestParam("bookId") int id) {
+	public ResponseEntity<WishlistResponse> removeWishlist(@RequestParam("token") String token, @PathVariable("bookId") int id) {
 		
 		return wishlistService.removeFromWishlist(token, id);
 		

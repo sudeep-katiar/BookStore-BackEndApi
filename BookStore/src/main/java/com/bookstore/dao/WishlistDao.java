@@ -21,5 +21,9 @@ public interface WishlistDao extends JpaRepository<Wishlist, Long> {
 	@Modifying
 	@Query(value = "delete from wishlist where book_id = :id and user_id = :userId", nativeQuery = true)
 	void removeBookFromWishlist(long userId, int id);
+	
+	@Query(value = "select * from wishlist where book_name = :bookName", nativeQuery = true)
+	Wishlist getWishListByName(String bookName);
+
 
 }
