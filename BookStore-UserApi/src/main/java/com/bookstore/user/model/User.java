@@ -1,16 +1,23 @@
 package com.bookstore.user.model;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sun.istack.NotNull;
 
 import lombok.Data;
+
 /*****************************************************************************************************
  * User Entity And Model Class which is mapped with table "user_details"
  *  
@@ -68,5 +75,10 @@ public class User {
 	@Column(name="IS_SELLER")
 	@NotNull
 	private boolean isSeller;
-	
+
+	@JsonIgnore
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name = "u_id")
+	private List<UserAddress> addresses;
+
 }

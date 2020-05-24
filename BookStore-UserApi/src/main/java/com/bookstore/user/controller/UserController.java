@@ -1,15 +1,8 @@
 package com.bookstore.user.controller;
+import com.bookstore.user.dto.AddressDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.bookstore.user.model.User;
 import com.bookstore.user.response.UserData;
@@ -28,7 +21,6 @@ import com.bookstore.user.service.IUserService;
  * 
  ******************************************************************************************************/
 
-
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/users")
@@ -38,20 +30,20 @@ public class UserController {
 	IUserService service;
 	/**
 	 * */
-	@PostMapping("/register")
+	@PostMapping("")
 	public ResponseEntity<UserResponse> registerUser(@RequestBody User user){
 		user.setSeller(false);
 		return service.register(user);
 	}
 	
-	@PostMapping("/seller-register")
+	@PostMapping("/seller")
 	public ResponseEntity<UserResponse> sellerRegister(@RequestBody User user){
 		user.setSeller(true);
 		return service.register(user);
 	}
 	
 	
-	@PutMapping("/activ/{token}")
+	@PutMapping("/activate/{token}")
 	public ResponseEntity<UserResponse> activateUserAccount(@PathVariable("token")String token){
 		return service.activateUser(token);
 	}
@@ -70,5 +62,33 @@ public class UserController {
 	public ResponseEntity<UserData> getUserById(@PathVariable("token") String token) {
 		return service.getUserByID(token);
 	}
-	
+
+	@PostMapping("/address")
+	public ResponseEntity<UserResponse> addAddressOfUser
+			( @RequestBody final AddressDto addressDto, @RequestHeader("token") final String token ) {
+		boolean isAddressAdded = service.isUserAddressAdded (addressDto, token);
+		if (isAddressAdded)
+			return ResponseEntity.ok ()
+					.body (new UserResponse (200, "Address added successfully!"));
+		return ResponseEntity.badRequest ()
+				.body (new UserResponse (400, "Oops...Error registering address!"));
+	}
+
+	@DeleteMapping("/address/{id}")
+	public ResponseEntity<UserResponse> removeAddressOfUser
+			( @PathVariable("id") final long addressId, @RequestHeader("token") final String token ) {
+		boolean isAddressRemoved = service.isUserAddressRemoved (addressId, token);
+		if (isAddressRemoved)
+			return ResponseEntity.ok ()
+					.body (new UserResponse (200, "Address removed successfully!"));
+		return ResponseEntity.badRequest ()
+				.body (new UserResponse (400, "Oops...Error removing address!"));
+	}
+
+	@GetMapping("/address")
+	public ResponseEntity<UserResponse> getAllAddresses( @RequestHeader("token") final String token ) {
+		return ResponseEntity.ok ()
+				.body (new UserResponse ("Addresses are : ", service.getAllAddressOfUser (token)));
+	}
+
 }

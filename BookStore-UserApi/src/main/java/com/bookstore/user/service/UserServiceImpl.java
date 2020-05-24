@@ -1,7 +1,12 @@
 package com.bookstore.user.service;
 
+import java.util.List;
 import java.util.Optional;
 
+import com.bookstore.user.dao.IAddressRepository;
+import com.bookstore.user.dto.AddressDto;
+import com.bookstore.user.exception.UserNotFoundException;
+import com.bookstore.user.model.UserAddress;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -42,6 +47,10 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class UserServiceImpl implements IUserService {
+
+	private static final String USER_NOT_FOUND_EXCEPTION_MESSAGE = "Oops...User not found!";
+	private static final int USER_NOT_FOUND_STATUS_CODE = 404;
+
 	@Autowired
 	IUserDAO userDao;
 	@Autowired
@@ -52,10 +61,12 @@ public class UserServiceImpl implements IUserService {
 	private JwtTokenUtil generateToken;
 	@Autowired
 	private UserData userresponce;
+	@Autowired
+	private IAddressRepository addressRepository;
 
 	/**
      *To register The User  
-     * @param User Objet
+     * @param user as User
      * @return ResponseEntity<UserResponse>
      */
 	@Override
@@ -82,7 +93,7 @@ public class UserServiceImpl implements IUserService {
 
 	/**
      *To Activate User/Seller  
-     * @param String token
+     * @param  token as String
      * @return ResponseEntity<UserResponse>
      */
 	
@@ -104,13 +115,15 @@ public class UserServiceImpl implements IUserService {
 	
 	/**
      *	To Login User	  
-     * @param User Objet
+     * @param  email as String
+     * @param  password as String
      * @return ResponseEntity<UserResponse>
      */
 
 	@Override
 	public ResponseEntity<Object> loginUser(String email, String password) {
 		Optional<User> user = Optional.ofNullable(userDao.getUser(email));
+		if(user.isPresent()) {
 		if (user.get().isActivate()) {
 			if (user.isPresent() && passwordEncryption.passwordEncoder().matches(password, user.get().getPassword())) {
 				return ResponseEntity.status(HttpStatus.ACCEPTED)
@@ -122,16 +135,21 @@ public class UserServiceImpl implements IUserService {
 		} else {
 			throw new AuthenticationFailedException("Please Verify Email Before Login", HttpStatus.BAD_REQUEST);
 		}
+		}else {
+			throw new AuthenticationFailedException("User Does Not Exist Please Reister", HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	/**
      * To Login As Admin  
-     * @param String email,String password
+     * @param  email,String password as String
      * @return ResponseEntity<Object>
      */
 	
 	public ResponseEntity<Object> loginAdmin(String email, String password) {
 		Optional<User> user = Optional.ofNullable(userDao.getUser(email));
+		if(user.isPresent()) {
+
 		if (user.get().isActivate()) {
 			if (user.isPresent() && user.get().isSeller()&&passwordEncryption.passwordEncoder().matches(password, user.get().getPassword())) {
 				return ResponseEntity.status(HttpStatus.ACCEPTED)
@@ -143,11 +161,15 @@ public class UserServiceImpl implements IUserService {
 		} else {
 			throw new AuthenticationFailedException("Please Verify Email Before Login", HttpStatus.BAD_REQUEST);
 		}
+		}else {
+			throw new AuthenticationFailedException("User Does Not Exist Please Reister", HttpStatus.BAD_REQUEST);
+		}
+
 	}
 
 	/**
      * To Get User From Using Token  
-     * @param String token
+     * @param  token as String
      * @return ResponseEntity<UserData>
      */
 	@Override
@@ -166,4 +188,78 @@ public class UserServiceImpl implements IUserService {
 			throw new InvalidTokenOrExpiredException("Invalid Token or Token Expired", HttpStatus.BAD_REQUEST);
 		}
 	}
+
+	/**
+	 * This function checks for the authentication of user if user is authenticated then
+	 * creates a new address by taking the input from given address by user and after successfully
+	 * addition of address returns boolean value
+	 *
+	 * @param addressDto as {@link AddressDto}
+	 * @param token      as String Jwt token
+	 * @return Boolean
+	 */
+	@Override
+	public boolean isUserAddressAdded( AddressDto addressDto, String token ) {
+		log.info ("fetched address dto : " + addressDto);
+		Optional<User> fetchedUser = getAuthenticatedUser (token);
+		if (fetchedUser.isPresent ()) {
+			UserAddress newAddress = new UserAddress ();
+			BeanUtils.copyProperties (addressDto, newAddress);
+			fetchedUser.get ().getAddresses ().add (newAddress);
+			addressRepository.saveAndFlush (newAddress);
+			return true;
+		}
+		throw new UserNotFoundException (USER_NOT_FOUND_EXCEPTION_MESSAGE, USER_NOT_FOUND_STATUS_CODE);
+	}
+
+	/**
+	 * This function takes jwt authentication token as String input parameter and checks
+	 * the originality of the user and after successful validation returns Valid User.
+	 *
+	 * @param token as String jwt.
+	 * @return Optional<User>
+	 */
+	private Optional<User> getAuthenticatedUser( String token ) {
+		try {
+			return Optional.ofNullable (userDao.getUserById (generateToken.parseToken (token)));
+		} catch (SignatureVerificationException | AlgorithmMismatchException e) {
+			log.error ("Authentication Failed", e);
+			throw new InvalidTokenOrExpiredException ("User Not Registered Or Token Expired", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	/**
+	 * This function checks for the authentication of user if user is authenticated then
+	 * removes the address given by the user and after successfully removal of address
+	 * returns boolean value
+	 *
+	 * @param addressId as Integer
+	 * @param token     as String Jwt token
+	 * @return Boolean
+	 */
+	@Override
+	public boolean isUserAddressRemoved( long addressId, String token ) {
+		Optional<User> fetchedUser = getAuthenticatedUser (token);
+		if (fetchedUser.isPresent ()) {
+			addressRepository.removeAddress (addressId, fetchedUser.get ().getUId ());
+			return true;
+		}
+		throw new UserNotFoundException (USER_NOT_FOUND_EXCEPTION_MESSAGE, USER_NOT_FOUND_STATUS_CODE);
+	}
+
+	/**
+	 * This function checks for the authentication of user if user is authenticated then
+	 * fetch all the address of the user
+	 *
+	 * @param token as String Jwt token
+	 * @return List<UserAddress>
+	 */
+	@Override
+	public List<UserAddress> getAllAddressOfUser( String token ) {
+		Optional<User> fetchedUser = getAuthenticatedUser (token);
+		if (fetchedUser.isPresent ())
+			return fetchedUser.get ().getAddresses ();
+		throw new UserNotFoundException (USER_NOT_FOUND_EXCEPTION_MESSAGE, USER_NOT_FOUND_STATUS_CODE);
+	}
+
 }
