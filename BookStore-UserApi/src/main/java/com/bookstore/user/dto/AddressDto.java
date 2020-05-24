@@ -1,8 +1,5 @@
 package com.bookstore.user.dto;
 
-import javax.persistence.Column;
-import javax.validation.constraints.NotBlank;
-
 import lombok.Data;
 
 /**
