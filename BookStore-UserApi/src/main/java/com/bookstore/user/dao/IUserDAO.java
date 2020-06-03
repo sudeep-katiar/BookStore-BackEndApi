@@ -17,4 +17,6 @@ public interface IUserDAO {
 	public User getUser(String userName);
 	public User loginUser(String email,String password);
 	public User getUserById(int id);
+	public boolean updatePassword(User user,String password);
+
 }

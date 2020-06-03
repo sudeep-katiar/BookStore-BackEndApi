@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.auth0.jwt.exceptions.AlgorithmMismatchException;
 import com.auth0.jwt.exceptions.JWTDecodeException;
@@ -165,6 +167,33 @@ public class UserServiceImpl implements IUserService {
 			throw new AuthenticationFailedException("User Does Not Exist Please Reister", HttpStatus.BAD_REQUEST);
 		}
 
+	}
+	
+	@Override
+	public ResponseEntity<Object> forgatPassword(String email){
+		Optional<User> user = Optional.ofNullable(userDao.getUser(email));
+		if(user.isPresent()) {
+			String link = "http://localhost:4200/activate/" + generateToken.generateToken(user.get().getUId());
+			emailGenerate.sendEmail(email, "Book Store ResetPassword", link);
+			return ResponseEntity.status(HttpStatus.ACCEPTED)
+					.body(new UserResponse(208, "Reset Password Link Sent to your email ===>" + user.get().getEmail()
+							+ "<=== please verify your email first"));
+		}else {
+			throw new AuthenticationFailedException("User Does Not Exist Please Reister", HttpStatus.BAD_REQUEST);
+		}
+
+	}
+	
+	@Override
+	public ResponseEntity<Object> resetPassword(@PathVariable("token") String token,@RequestHeader("password") String password){
+
+		if (userDao.getUserById(generateToken.parseToken(token)) != null) {
+			userDao.updatePassword(userDao.getUserById(generateToken.parseToken(token)), password);
+			return ResponseEntity.status(HttpStatus.ACCEPTED)
+					.body(new UserResponse(202, "Password Updated Successfully"));
+		}else {
+			throw new InvalidTokenOrExpiredException("Invalid Token or Token Expired", HttpStatus.BAD_REQUEST);
+		}		
 	}
 
 	/**
