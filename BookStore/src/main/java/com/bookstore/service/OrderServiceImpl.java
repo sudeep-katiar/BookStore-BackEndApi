@@ -2,6 +2,7 @@ package com.bookstore.service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -223,14 +224,20 @@ public class OrderServiceImpl implements IOrderservice {
 				helper.setSubject("BookStore Order Summery");
 				helper.setFrom("pati.rupesh990@gmail.com");
 //				sender.send(message);
+				List<Book> orderedBooks = new ArrayList<Book>();
+				List<Book>fetchedBooks=bookDao.getAllBooks();
+
+				for (Book fetchedBook : fetchedBooks) {
+					for (Order fetchedOrder : order) {
+						if(fetchedOrder.getBookId() == fetchedBook.getBookId()) {
+							orderedBooks.add(fetchedBook);
+						}
+					}
+				}
+
 				Cart confirmOrder=new Cart();
 				confirmOrder.setUserId(userData.getUId());
-				List<Book>books=bookDao.getAllBooks();
-				List<Book> orderedBooks=books.stream().filter(b->(order.stream().filter(o->o.getBookId()==b.getBookId()).count())<0).collect(Collectors.toList()); 
-				System.out.println(orderedBooks);
-				orderedBooks.forEach(p->{
-					confirmOrder.getBooks().add(p);
-				});
+				confirmOrder.setBooksList(orderedBooks);				
 				order.stream().forEachOrdered(p->{
 					confirmOrder.setFinalAmount(confirmOrder.getFinalAmount()+p.getTotal());
 				});

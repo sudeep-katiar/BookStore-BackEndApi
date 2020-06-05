@@ -1,8 +1,8 @@
 package com.bookstore.entity;
 
+import java.util.List;
 
-import java.util.Set;
-
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -14,6 +14,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 
@@ -47,8 +48,9 @@ public class Cart {
 	@Column
 	private String addressType;
 	
-	@ManyToMany
-	@JoinTable(name="books_order",joinColumns = {@JoinColumn(name="invoice_number")},inverseJoinColumns = {@JoinColumn(name="book_id")})
-	private Set<Book> books;
+	@JsonIgnore
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JoinTable(name="books_orders",joinColumns = {@JoinColumn(name="invoice_number")},inverseJoinColumns = {@JoinColumn(name="book_id")})
+	private List<Book> booksList;
 	
 }
