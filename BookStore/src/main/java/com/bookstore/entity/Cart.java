@@ -9,8 +9,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -42,9 +42,15 @@ public class Cart {
 	@Column
 	private double finalAmount;
 	
+	@Column
+	private int userId;
+	
+	@Column
+	private String addressType;
+	
 	@JsonIgnore
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name = "invoice_number")
-	private List<Order> orders;
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JoinTable(name="books_orders",joinColumns = {@JoinColumn(name="invoice_number")},inverseJoinColumns = {@JoinColumn(name="book_id")})
+	private List<Book> booksList;
 	
 }

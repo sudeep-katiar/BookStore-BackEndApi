@@ -1,14 +1,16 @@
 package com.bookstore.user.service;
 
-import com.bookstore.user.dto.AddressDto;
-import com.bookstore.user.model.UserAddress;
-import org.springframework.http.ResponseEntity;
+import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+
+import com.bookstore.user.dto.AddressDto;
 import com.bookstore.user.model.User;
+import com.bookstore.user.model.UserAddress;
 import com.bookstore.user.response.UserData;
 import com.bookstore.user.response.UserResponse;
-
-import java.util.List;
 
 /*****************************************************************************************************
  * Its Interface for A User Api Contract Methods
@@ -27,6 +29,8 @@ public interface IUserService {
 	public ResponseEntity<Object> loginUser(String email, String password);
 	public ResponseEntity<UserData> getUserByID(String token);
 	public ResponseEntity<Object> loginAdmin(String email, String password);
+	public ResponseEntity<Object> forgatPassword(String email); 
+	public ResponseEntity<Object> resetPassword(@PathVariable("token") String token,@RequestHeader("password") String password);
 
 	/**
 	 * takes user's {@link AddressDto} and token as input parameter and after successful

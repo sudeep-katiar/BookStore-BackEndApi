@@ -2,10 +2,12 @@ package com.bookstore.service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -181,6 +183,9 @@ public class OrderServiceImpl implements IOrderservice {
 	public ResponseEntity<Object> cancelOrder(int bookId) {
 		
 			if (orderDao.deleteOrder(bookId) > 0) {
+				Book book=bookDao.getBookByBookId(bookId);
+				book.setQuantity(book.getQuantity()+1);
+				bookDao.updateBook(book, book.getBookName());
 				return ResponseEntity.status(HttpStatus.ACCEPTED)
 						.body(new OrderResponse(202, "Order Deleted SuccessFully"));
 			} else {
@@ -219,8 +224,20 @@ public class OrderServiceImpl implements IOrderservice {
 				helper.setSubject("BookStore Order Summery");
 				helper.setFrom("pati.rupesh990@gmail.com");
 //				sender.send(message);
+				List<Book> orderedBooks = new ArrayList<Book>();
+				List<Book>fetchedBooks=bookDao.getAllBooks();
+
+				for (Book fetchedBook : fetchedBooks) {
+					for (Order fetchedOrder : order) {
+						if(fetchedOrder.getBookId() == fetchedBook.getBookId()) {
+							orderedBooks.add(fetchedBook);
+						}
+					}
+				}
+
 				Cart confirmOrder=new Cart();
-				confirmOrder.setOrders(order);
+				confirmOrder.setUserId(userData.getUId());
+				confirmOrder.setBooksList(orderedBooks);				
 				order.stream().forEachOrdered(p->{
 					confirmOrder.setFinalAmount(confirmOrder.getFinalAmount()+p.getTotal());
 				});
