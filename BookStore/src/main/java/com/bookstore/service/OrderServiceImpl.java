@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -26,10 +25,13 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.bookstore.dao.BookDaoImpl;
 import com.bookstore.dao.IOrderDAO;
+import com.bookstore.dao.IQuantityDAO;
 import com.bookstore.dto.MailResponse;
+import com.bookstore.dto.OrderDTO;
 import com.bookstore.entity.Book;
 import com.bookstore.entity.Cart;
 import com.bookstore.entity.Order;
+import com.bookstore.entity.Quantity;
 import com.bookstore.entity.UserData;
 import com.bookstore.exception.InvalidTokenOrExpiredException;
 import com.bookstore.exception.UserDoesNotExistException;
@@ -43,15 +45,19 @@ import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
 
 /***************************************************************************************************
- * OrderService Implementation Class By using the object reference of OrderDAO for DataBase Related Support,
- * RestTemplate for comminication between BookStore-Api & BookSrore WebApi, JwtTokenUtil to Generate the Token And parse the token.This Service Class Contains the implementation methods
- * of IBookService Interface methods like Make book Order,delete book Order, Update Book Order,Confirm Order. 
+ * OrderService Implementation Class By using the object reference of OrderDAO
+ * for DataBase Related Support, RestTemplate for comminication between
+ * BookStore-Api & BookSrore WebApi, JwtTokenUtil to Generate the Token And
+ * parse the token.This Service Class Contains the implementation methods of
+ * IBookService Interface methods like Make book Order,delete book Order, Update
+ * Book Order,Confirm Order.
  *
  * @author Rupesh Patil
  * @version 2.0
  * @updated 2020-05-06
  * @created 2020-04-15
- * @see {@link IOrderDAO} implementation of all the required DB related functionality
+ * @see {@link IOrderDAO} implementation of all the required DB related
+ *      functionality
  * @see {@link restTemplate} will Inject Object for communicate two web-apis.
  * @see {@link JwtTokenUtil} for parse and generate token.
  * @see {@link JavaMailSender} for Send the Mails.
@@ -65,44 +71,49 @@ public class OrderServiceImpl implements IOrderservice {
 	IOrderDAO orderDao;
 	@Autowired
 	BookDaoImpl bookDao;
+
+	@Autowired
+	IQuantityDAO quantityDao;
+
 	@Autowired
 	RestTemplate restTemplate;
 	@Autowired
 	private JwtTokenUtil generateToken;
 	static UserData userData;
-	 double finalAmount=0;
+	double finalAmount = 0;
 	@Autowired
 	private JavaMailSender sender;
 	@Autowired
 	Configuration config;
 
 	/*********************************************************************
-     * To make book order by the user.  
-     * @param String token, int id, int quantity
-     * @return ResponseEntity<Object>
-     ********************************************************************/
+	 * To make book order by the user.
+	 * 
+	 * @param String token, int id, int quantity
+	 * @return ResponseEntity<Object>
+	 ********************************************************************/
 	@Override
-	public ResponseEntity<Object> makeOrder(int id, int quantity,int userId) {
-			Book book = bookDao.getBookByBookId(id);
-			Order order = new Order();
-			order.setBookId(id);
-			order.setUserId(userId);
-			order.setQuantity(quantity);
-			order.setBookName(book.getBookName());
-			order.setPrice(book.getPrice());
-			order.setTotal(order.getPrice()*order.getQuantity());
-			order.setBookImage(book.getBookImage());
-			if (orderDao.addOrder(order) > 0) {
-				book.setQuantity(book.getQuantity()-1);
-				bookDao.updateBook(book, book.getBookName());
-				System.out.println("Added successfully");
-				return ResponseEntity.status(HttpStatus.ACCEPTED).body(new OrderResponse(202, "Order Added to cart"));
-			}
-		
+	public ResponseEntity<Object> makeOrder(int id, int quantity, int userId) {
+		Book book = bookDao.getBookByBookId(id);
+		Order order = new Order();
+		order.setBookId(id);
+		order.setUserId(userId);
+		order.setQuantity(quantity);
+		order.setBookName(book.getBookName());
+		order.setPrice(book.getPrice());
+		order.setTotal(order.getPrice() * order.getQuantity());
+		order.setBookImage(book.getBookImage());
+		if (orderDao.addOrder(order) > 0) {
+			book.setQuantity(book.getQuantity() - 1);
+			bookDao.updateBook(book, book.getBookName());
+			System.out.println("Added successfully");
+			return ResponseEntity.status(HttpStatus.ACCEPTED).body(new OrderResponse(202, "Order Added to cart"));
+		}
+
 		return null;
 	}
 
-	public ResponseEntity<Object> makeOrderWithToken(int id,int quantity,String token){
+	public ResponseEntity<Object> makeOrderWithToken(int id, int quantity, String token) {
 		Book book = bookDao.getBookByBookId(id);
 		Order order = new Order();
 		order.setBookId(id);
@@ -110,40 +121,41 @@ public class OrderServiceImpl implements IOrderservice {
 		order.setQuantity(quantity);
 		order.setBookName(book.getBookName());
 		order.setPrice(book.getPrice());
-		order.setTotal(order.getPrice()*order.getQuantity());
+		order.setTotal(order.getPrice() * order.getQuantity());
 		order.setBookImage(book.getBookImage());
 		if (orderDao.addOrder(order) > 0) {
-			book.setQuantity(book.getQuantity()-1);
+			book.setQuantity(book.getQuantity() - 1);
 			bookDao.updateBook(book, book.getBookName());
 			System.out.println("Added successfully");
 			return ResponseEntity.status(HttpStatus.ACCEPTED).body(new OrderResponse(202, "Order Added to cart"));
 		}
-	
-	return null;
+
+		return null;
 	}
 
 	/*********************************************************************
-     * To get List Of Book from the Order list db table.  
-     * @param String token
-     * @return ResponseEntity<Object>
-     ********************************************************************/
+	 * To get List Of Book from the Order list db table.
+	 * 
+	 * @param String token
+	 * @return ResponseEntity<Object>
+	 ********************************************************************/
 	@Override
 	public ResponseEntity<Object> getCartList(int userId) {
-		Optional<List<Order>> orders=null;
-		
-			orders = Optional.ofNullable(orderDao.getOrderList(userId));
-			if (orders.isPresent()) {
-				return ResponseEntity.status(HttpStatus.ACCEPTED)
-						.body(new OrderListResponse(202, "total books in cart" + orders.get().size(), orders.get()));
-			} else {
-				return ResponseEntity.status(HttpStatus.ACCEPTED)
-						.body(new OrderResponse(202, "No any Books Added to cart"));
-			}
+		Optional<List<Order>> orders = null;
+
+		orders = Optional.ofNullable(orderDao.getOrderList(userId));
+		if (orders.isPresent()) {
+			return ResponseEntity.status(HttpStatus.ACCEPTED)
+					.body(new OrderListResponse(202, "total books in cart" + orders.get().size(), orders.get()));
+		} else {
+			return ResponseEntity.status(HttpStatus.ACCEPTED)
+					.body(new OrderResponse(202, "No any Books Added to cart"));
+		}
 	}
-	
-	public ResponseEntity<Object> getCartListWithToken(String token){
-		Optional<List<Order>> orders=null;
-		
+
+	public ResponseEntity<Object> getCartListWithToken(String token) {
+		Optional<List<Order>> orders = null;
+
 		orders = Optional.ofNullable(orderDao.getOrderList(generateToken.parseToken(token)));
 		if (orders.isPresent()) {
 			return ResponseEntity.status(HttpStatus.ACCEPTED)
@@ -152,67 +164,68 @@ public class OrderServiceImpl implements IOrderservice {
 			return ResponseEntity.status(HttpStatus.ACCEPTED)
 					.body(new OrderResponse(202, "No any Books Added to cart"));
 		}
-		
+
 	}
 
 	/*********************************************************************
-     * To update Quantity of books by the user then user can increse or decrease
-     * Quantity for purchase books.  
-     * @param String token, Order order
-     * @return ResponseEntity<Object>
-     ********************************************************************/
+	 * To update Quantity of books by the user then user can increse or decrease
+	 * Quantity for purchase books.
+	 * 
+	 * @param String token, Order order
+	 * @return ResponseEntity<Object>
+	 ********************************************************************/
 	@Override
-	public ResponseEntity<Object> updateQuantity( Order order) {
-		
-			if (orderDao.updateQuantity(order) > 0) {
-				return ResponseEntity.status(HttpStatus.ACCEPTED).body(new OrderResponse(202, "Quantity Updatd"));
-			} else {
-				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-						.body(new OrderResponse(500, "Error in Updated Quantity"));
-			}
-		
+	public ResponseEntity<Object> updateQuantity(Order order) {
+
+		if (orderDao.updateQuantity(order) > 0) {
+			return ResponseEntity.status(HttpStatus.ACCEPTED).body(new OrderResponse(202, "Quantity Updatd"));
+		} else {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(new OrderResponse(500, "Error in Updated Quantity"));
+		}
+
 	}
-	
+
 	/*********************************************************************
-     * To cancel the book order by the user it will remove book from cart.
-     * 
-     * @param String token, int bookId
-     * @return ResponseEntity<Object>
-     ********************************************************************/
+	 * To cancel the book order by the user it will remove book from cart.
+	 * 
+	 * @param String token, int bookId
+	 * @return ResponseEntity<Object>
+	 ********************************************************************/
 	@Override
 	public ResponseEntity<Object> cancelOrder(int bookId) {
-		
-			if (orderDao.deleteOrder(bookId) > 0) {
-				Book book=bookDao.getBookByBookId(bookId);
-				book.setQuantity(book.getQuantity()+1);
-				bookDao.updateBook(book, book.getBookName());
-				return ResponseEntity.status(HttpStatus.ACCEPTED)
-						.body(new OrderResponse(202, "Order Deleted SuccessFully"));
-			} else {
-				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-						.body(new OrderResponse(500, "Error in Delete Order"));
-			}
-		 
+
+		if (orderDao.deleteOrder(bookId) > 0) {
+			Book book = bookDao.getBookByBookId(bookId);
+			book.setQuantity(book.getQuantity() + 1);
+			bookDao.updateBook(book, book.getBookName());
+			return ResponseEntity.status(HttpStatus.ACCEPTED)
+					.body(new OrderResponse(202, "Order Deleted SuccessFully"));
+		} else {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(new OrderResponse(500, "Error in Delete Order"));
+		}
+
 	}
 
 	/***************************************************************************
-     * To confirm the order by the user after confirmation of order will Send
-     * mail to user Attached with FreeMarker template.
+	 * To confirm the order by the user after confirmation of order will Send mail
+	 * to user Attached with FreeMarker template.
 	 *
-     * @param String token, List<Order> order
-     * @return ResponseEntity<Object>
-     ********************************************************************/
+	 * @param String token, List<Order> order
+	 * @return ResponseEntity<Object>
+	 ********************************************************************/
 	@Override
 	public ResponseEntity<Object> confirmOrder(String token, List<Order> order) {
 		if (verifyUser(token)) {
 			MimeMessage message = sender.createMimeMessage();
 			Map<String, Object> model = new HashMap<String, Object>();
-			order.forEach(s->{
-				double temp=0;
-				temp =s.getTotal();
-				finalAmount +=temp;
+			order.forEach(s -> {
+				double temp = 0;
+				temp = s.getTotal();
+				finalAmount += temp;
 			});
-			model.put("name",userData.getFirstName());
+			model.put("name", userData.getFirstName());
 			model.put("total", finalAmount);
 			try {
 				MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_RELATED,
@@ -225,21 +238,29 @@ public class OrderServiceImpl implements IOrderservice {
 				helper.setFrom("pati.rupesh990@gmail.com");
 //				sender.send(message);
 				List<Book> orderedBooks = new ArrayList<Book>();
-				List<Book>fetchedBooks=bookDao.getAllBooks();
+				List<Book> fetchedBooks = bookDao.getAllBooks();
 
 				for (Book fetchedBook : fetchedBooks) {
 					for (Order fetchedOrder : order) {
-						if(fetchedOrder.getBookId() == fetchedBook.getBookId()) {
+						if (fetchedOrder.getBookId() == fetchedBook.getBookId()) {
 							orderedBooks.add(fetchedBook);
 						}
 					}
 				}
 
-				Cart confirmOrder=new Cart();
+				Cart confirmOrder = new Cart();
 				confirmOrder.setUserId(userData.getUId());
-				confirmOrder.setBooksList(orderedBooks);				
-				order.stream().forEachOrdered(p->{
-					confirmOrder.setFinalAmount(confirmOrder.getFinalAmount()+p.getTotal());
+				confirmOrder.setBooksList(orderedBooks);
+				order.stream().forEachOrdered(p -> {
+					confirmOrder.setFinalAmount(confirmOrder.getFinalAmount() + p.getTotal());
+				});
+
+				order.forEach(p -> {
+					Quantity quantity = new Quantity();
+					quantity.setBookId(p.getBookId());
+					quantity.setUserId(p.getUserId());
+					quantity.setQuantity(p.getQuantity());
+					quantityDao.addOrderQuantity(quantity);
 				});
 				orderDao.saveOrderDetails(confirmOrder);
 				orderDao.removeAllOrder(userData.getUId());
@@ -248,19 +269,63 @@ public class OrderServiceImpl implements IOrderservice {
 				System.out.println("Error in message sending");
 				e.printStackTrace();
 			}
-		}else {
+		} else {
 			throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
 		}
-		
+
 		return null;
 	}
 
+	public ResponseEntity<Object> getOrderList(String token) {
+		if (verifyUser(token)) {
+			List<Cart> orders=orderDao.getUsersOrderList(userData.getUId());
+			List<Book> books=new ArrayList<>();
+			orders.forEach(order->{
+				books.addAll(order.getBooksList());
+			});
+			List<Quantity> booksQty=new ArrayList<Quantity>();
+			books.forEach(book->{
+				booksQty.add(quantityDao.getOrdersQuantity(userData.getUId(), book.getBookId()));
+			});
+			
+//			books.forEach(book->{
+//				booksQty.forEach(qty->{
+//					if(book.getBookId()==qty.getBookId()) {
+//						book.setQuantity(qty.getQuantity());
+//					}
+//				});
+//			});
+			
+			orders.forEach(order->{
+				booksQty.forEach(qty->{
+					order.getBooksList().forEach(book->{
+						if(book.getBookId()==qty.getBookId())
+						{
+							book.setQuantity(qty.getQuantity());
+						}
+					});
+				});
+			});
+			List<OrderDTO> orderResponse=new ArrayList<>();
+			orders.forEach(order->{
+				OrderDTO orderDto=new OrderDTO();
+				orderDto.setInvoiceNumber(order.getInvoiceNumber());
+				orderDto.setOrders(order.getBooksList());
+				orderResponse.add(orderDto);
+			});
+			return ResponseEntity.status(HttpStatus.ACCEPTED).body(orderResponse);
+		}else {
+			throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
+		}
+	}
+
 	/*********************************************************************
-     * To verify User whether user is verified or token is valid or not.
-	 * will get data from user-Api using Resttemplate.
-     * @param String token
-     * @return boolean
-     ********************************************************************/
+	 * To verify User whether user is verified or token is valid or not. will get
+	 * data from user-Api using Resttemplate.
+	 * 
+	 * @param String token
+	 * @return boolean
+	 ********************************************************************/
 	public boolean verifyUser(String token) {
 		log.info("-------->>>>>>>>>>>>>Calling USerApi From NotesApi<<<<<<<<<<<<<<<<--------------------");
 		userData = restTemplate.getForObject("http://localhost:8092/users/" + token, UserData.class);
