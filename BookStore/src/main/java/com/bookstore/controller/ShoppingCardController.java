@@ -70,5 +70,10 @@ public class ShoppingCardController {
 	public ResponseEntity<Object> confirmOrder(@RequestBody List<Order> order,@RequestHeader String token) {
 		return orderService.confirmOrder(token,order);
 	}
+	@GetMapping("/orders")
+	public ResponseEntity<Object> getUserOrders(@RequestHeader String token){
+		return orderService.getOrderList(token);
+	}
+	
 	
 }
