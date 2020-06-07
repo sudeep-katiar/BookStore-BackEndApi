@@ -288,14 +288,6 @@ public class OrderServiceImpl implements IOrderservice {
 				booksQty.add(quantityDao.getOrdersQuantity(userData.getUId(), book.getBookId()));
 			});
 			
-//			books.forEach(book->{
-//				booksQty.forEach(qty->{
-//					if(book.getBookId()==qty.getBookId()) {
-//						book.setQuantity(qty.getQuantity());
-//					}
-//				});
-//			});
-			
 			orders.forEach(order->{
 				booksQty.forEach(qty->{
 					order.getBooksList().forEach(book->{
