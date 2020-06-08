@@ -134,4 +134,13 @@ public class OredrDAOImpl implements IOrderDAO {
 		hQuery.setParameter("uid", userId);
 		return hQuery.list();
 	}
+	
+	public Cart getOrder(int userId,String createdTime) {
+		String query="FROM Cart where userId=:uid AND createdTime=:ct";
+		Query<Cart> hQuery=cartHibernateUtil.select(query);
+		hQuery.setParameter("uid", userId);
+		hQuery.setParameter("ct", createdTime);
+		return hQuery.getSingleResult();
+	}
+	
 }

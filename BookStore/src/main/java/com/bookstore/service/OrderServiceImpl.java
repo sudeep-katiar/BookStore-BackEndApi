@@ -2,6 +2,8 @@ package com.bookstore.service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -247,22 +249,27 @@ public class OrderServiceImpl implements IOrderservice {
 						}
 					}
 				}
-
+				String cuurentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 				Cart confirmOrder = new Cart();
+				confirmOrder.setCreatedTime(cuurentTime);
 				confirmOrder.setUserId(userData.getUId());
 				confirmOrder.setBooksList(orderedBooks);
 				order.stream().forEachOrdered(p -> {
 					confirmOrder.setFinalAmount(confirmOrder.getFinalAmount() + p.getTotal());
 				});
 
+				
+				orderDao.saveOrderDetails(confirmOrder);
 				order.forEach(p -> {
+					Cart cartOrder=orderDao.getOrder(p.getUserId(), cuurentTime);
 					Quantity quantity = new Quantity();
 					quantity.setBookId(p.getBookId());
 					quantity.setUserId(p.getUserId());
 					quantity.setQuantity(p.getQuantity());
+					quantity.setCreatedTime(cuurentTime);
+					quantity.setInvoiceNumber(cartOrder.getInvoiceNumber());
 					quantityDao.addOrderQuantity(quantity);
 				});
-				orderDao.saveOrderDetails(confirmOrder);
 				orderDao.removeAllOrder(userData.getUId());
 				return ResponseEntity.status(HttpStatus.ACCEPTED).body(new MailResponse("Mail Sent", "202"));
 			} catch (MessagingException | IOException | TemplateException e) {
@@ -278,35 +285,51 @@ public class OrderServiceImpl implements IOrderservice {
 
 	public ResponseEntity<Object> getOrderList(String token) {
 		if (verifyUser(token)) {
-			List<Cart> orders=orderDao.getUsersOrderList(userData.getUId());
-			List<Book> books=new ArrayList<>();
-			orders.forEach(order->{
-				books.addAll(order.getBooksList());
+			List<Cart> orders = orderDao.getUsersOrderList(userData.getUId());
+
+			List<Quantity> booksQty = new ArrayList<Quantity>();
+
+			HashMap<Integer, List<Book>> booksList = new HashMap<>();
+			orders.forEach(order -> {
+				booksList.put(order.getInvoiceNumber(), order.getBooksList());
 			});
-			List<Quantity> booksQty=new ArrayList<Quantity>();
-			books.forEach(book->{
-				booksQty.add(quantityDao.getOrdersQuantity(userData.getUId(), book.getBookId()));
-			});
-			
-			orders.forEach(order->{
-				booksQty.forEach(qty->{
-					order.getBooksList().forEach(book->{
-						if(book.getBookId()==qty.getBookId())
-						{
-							book.setQuantity(qty.getQuantity());
-						}
-					});
+
+			HashMap<Integer, List<Quantity>> orderQuantityList = new HashMap<Integer, List<Quantity>>();
+			orders.forEach(order -> {
+				booksList.forEach((key, books) -> {
+					if (order.getInvoiceNumber() == key) {
+						List<Quantity> qty=new ArrayList<>();
+						books.forEach(book -> {	
+									qty.add(quantityDao.getOrdersQuantity(userData.getUId(), book.getBookId(), order.getCreatedTime()));
+						});
+						orderQuantityList.put(order.getInvoiceNumber(), qty);
+					}
 				});
 			});
-			List<OrderDTO> orderResponse=new ArrayList<>();
+
 			orders.forEach(order->{
-				OrderDTO orderDto=new OrderDTO();
+				orderQuantityList.forEach((key,quantity)->{
+					if(order.getInvoiceNumber()==key) {
+						quantity.forEach(qty->{
+							order.getBooksList().forEach(book->{
+								if(qty.getBookId()==book.getBookId()) {
+									book.setQuantity(qty.getQuantity());
+								}
+							});
+						});
+					}
+				});
+			});
+
+			List<OrderDTO> orderResponse = new ArrayList<>();
+			orders.forEach(order -> {
+				OrderDTO orderDto = new OrderDTO();
 				orderDto.setInvoiceNumber(order.getInvoiceNumber());
 				orderDto.setOrders(order.getBooksList());
 				orderResponse.add(orderDto);
 			});
 			return ResponseEntity.status(HttpStatus.ACCEPTED).body(orderResponse);
-		}else {
+		} else {
 			throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
 		}
 	}

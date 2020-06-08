@@ -25,4 +25,5 @@ public interface IOrderDAO {
 	public int removeAllOrder(int userId);
 	public void saveOrderDetails(Cart orders);
 	public List<Cart> getUsersOrderList(int userId);
+	public Cart getOrder(int userId,String createdTime);
 }
