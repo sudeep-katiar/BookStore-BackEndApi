@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
+import lombok.ToString;
 
 /*****************************************************************************************************
  * Cart Entity And Model Class which is mapped with table "order_details"
@@ -30,6 +31,7 @@ import lombok.Data;
 @Table(name = "order_details")
 @Data
 @Entity
+@ToString
 public class Cart {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

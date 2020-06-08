@@ -29,12 +29,13 @@ public class QuantityDAOImpl implements IQuantityDAO{
 	}
 
 	@Override
-	public Quantity getOrdersQuantity(int userId,int bookId) {		
+	public Quantity getOrdersQuantity(int userId,int bookId,String dateTime) {		
 		try {
-		String query="FROM Quantity where userId=:uid AND bookId=:bid";
+		String query="FROM Quantity where userId=:uid AND bookId=:bid AND createdTime=:cd";
 		Query<Quantity> hQuery=hibernateUtil.createQuery(query);
 		hQuery.setParameter("uid", userId);
 		hQuery.setParameter("bid", bookId);
+		hQuery.setParameter("cd", dateTime);
 		return hQuery.uniqueResult();
 //		return null;
 		}catch (Exception e) {
