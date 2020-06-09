@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bookstore.entity.Order;
+import com.bookstore.response.OrderResponse;
 import com.bookstore.service.IOrderservice;
 /************************************************************************************************************************************************
  * ShoppingCartController By using the object reference of OrderService class This Controller Has fuctionallity to Make Book Order,Update Order ,
@@ -71,9 +72,18 @@ public class ShoppingCardController {
 		return orderService.confirmOrder(token,order);
 	}
 	@GetMapping("/orders")
-	public ResponseEntity<Object> getUserOrders(@RequestHeader String token){
+	public ResponseEntity<OrderResponse> getUserOrders(@RequestHeader String token){
 		return orderService.getOrderList(token);
 	}
+	
+//	@PatchMapping("/{orderId}")
+//	public ResponseEntity<OrderResponse> addRatingToOrder(@RequestHeader("token") final String token,
+//			@RequestParam("orderId") final int orderId, @PathVariable("bookId") final int bookId) {
+//		if (orderService.isRatingAdded(token, orderId, bookId)) {
+//			return ResponseEntity.ok().body(new OrderResponse(200, "Order Rated Successfully!"));
+//		}
+//		return ResponseEntity.badRequest().body(new OrderResponse(400, "Oops... Error adding Rating!"));
+//	}
 	
 	
 }

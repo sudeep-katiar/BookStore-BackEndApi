@@ -29,7 +29,7 @@ import com.bookstore.dao.BookDaoImpl;
 import com.bookstore.dao.IOrderDAO;
 import com.bookstore.dao.IQuantityDAO;
 import com.bookstore.dto.MailResponse;
-import com.bookstore.dto.OrderDTO;
+import com.bookstore.dto.PlacedOrderDetail;
 import com.bookstore.entity.Book;
 import com.bookstore.entity.Cart;
 import com.bookstore.entity.Order;
@@ -283,7 +283,7 @@ public class OrderServiceImpl implements IOrderservice {
 		return null;
 	}
 
-	public ResponseEntity<Object> getOrderList(String token) {
+	public ResponseEntity<OrderResponse> getOrderList(String token) {
 		if (verifyUser(token)) {
 			List<Cart> orders = orderDao.getUsersOrderList(userData.getUId());
 
@@ -321,14 +321,28 @@ public class OrderServiceImpl implements IOrderservice {
 				});
 			});
 
-			List<OrderDTO> orderResponse = new ArrayList<>();
+//			List<OrderDTO> orderResponse = new ArrayList<>();
+			List<PlacedOrderDetail> placedOrders = new ArrayList<>();
+
 			orders.forEach(order -> {
-				OrderDTO orderDto = new OrderDTO();
-				orderDto.setInvoiceNumber(order.getInvoiceNumber());
-				orderDto.setOrders(order.getBooksList());
-				orderResponse.add(orderDto);
+				
+//				orderDto.setOrders(order.getBooksList());
+				order.getBooksList().forEach(book -> {
+					PlacedOrderDetail orderDto = new PlacedOrderDetail();
+					orderDto.setInvoiceNumber(order.getInvoiceNumber());
+					orderDto.setBookId(book.getBookId());
+					orderDto.setBookName(book.getBookName());
+					orderDto.setAuthorName(book.getAuthorName());
+					orderDto.setPrice(book.getPrice());
+					orderDto.setQuantity(book.getQuantity());
+					orderDto.setBookImage(book.getBookImage());
+					placedOrders.add(orderDto);
+				});
+				
 			});
-			return ResponseEntity.status(HttpStatus.ACCEPTED).body(orderResponse);
+//			List<PlacedOrderDetail> placedOrders = new ArrayList<>();
+			
+			return ResponseEntity.status(HttpStatus.ACCEPTED).body(new OrderResponse(placedOrders));
 		} else {
 			throw new UserDoesNotExistException("User Does Not Exist", HttpStatus.BAD_REQUEST);
 		}
@@ -354,4 +368,14 @@ public class OrderServiceImpl implements IOrderservice {
 			throw new InvalidTokenOrExpiredException("Invalid Token or Token Expired", HttpStatus.BAD_REQUEST);
 		}
 	}
+
+//	@Override
+//	public boolean isRatingAdded(String token, int orderId, int bookId) {
+//		if(verifyUser(token)) {
+//			orderDao.getOrder(bookId, userRating);
+//		}
+//		return false;
+//	}
+
+	
 }
