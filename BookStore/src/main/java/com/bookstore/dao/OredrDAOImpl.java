@@ -123,8 +123,30 @@ public class OredrDAOImpl implements IOrderDAO {
 		hQuery.setParameter("id", userId);
 		return hQuery.list();
 	}
-	
+	@Override
 	public void saveOrderDetails(Cart orders) {
 		cartHibernateUtil.save(orders);
 	}
+	@Override
+	public List<Cart> getUsersOrderList(int userId){
+		String query="FROM Cart where userId=:uid";
+		Query<Cart> hQuery=cartHibernateUtil.select(query);
+		hQuery.setParameter("uid", userId);
+		return hQuery.list();
+	}
+	
+	public Cart getOrder(int userId,String createdTime) {
+		String query="FROM Cart where userId=:uid AND createdTime=:ct";
+		Query<Cart> hQuery=cartHibernateUtil.select(query);
+		hQuery.setParameter("uid", userId);
+		hQuery.setParameter("ct", createdTime);
+		return hQuery.getSingleResult();
+	}
+
+//	@Override
+//	public void getOrder(int bookId, double userRating) {
+//		String query = "UPDATE Order SET quantity=:qty,total=:total WHERE OrderId=:id";
+//		
+//	}
+	
 }

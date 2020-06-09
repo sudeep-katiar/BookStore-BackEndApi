@@ -1,12 +1,17 @@
 package com.bookstore.entity;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 import lombok.ToString;
@@ -57,5 +62,11 @@ public class Book {
 	
 	@Column
 	private String bookImage;
+	
+	@ManyToMany(mappedBy = "booksList")
+	@JsonIgnore
+	private List<Cart> books;
+	
+	private boolean isRated;
 	
 }

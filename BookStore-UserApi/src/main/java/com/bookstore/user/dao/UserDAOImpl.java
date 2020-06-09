@@ -124,5 +124,15 @@ public class UserDAOImpl implements IUserDAO {
 			return null;
 		}
 	}
-
+	
+	@Override
+	public boolean updatePassword(User user,String password) {
+		try {
+		user.setPassword(password);
+		hibernateUtil.update(user);
+		return true;
+		}catch (Exception e) {
+			return false;
+		}
+	}
 }

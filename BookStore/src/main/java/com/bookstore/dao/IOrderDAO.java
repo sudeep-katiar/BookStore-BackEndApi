@@ -24,5 +24,11 @@ public interface IOrderDAO {
 	public int updateQuantity(Order order);
 	public int removeAllOrder(int userId);
 	public void saveOrderDetails(Cart orders);
-
+	public List<Cart> getUsersOrderList(int userId);
+	public Cart getOrder(int userId,String createdTime);
+//	/**
+//	 * 
+//	 * @param orderId
+//	 */
+//	public void getOrder(int bookId, double userRating);
 }

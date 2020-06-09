@@ -58,6 +58,16 @@ public class UserController {
 		return service.loginAdmin(email,password);
 	}
 	
+	@GetMapping("/forgot-password/{email}")
+	public ResponseEntity<Object> forgatPassword(@PathVariable("email") String email) {
+		return service.forgatPassword(email);
+	}
+	
+	@PutMapping("/{token}")	
+	public ResponseEntity<Object> resetPassword(@PathVariable("token") String token,@RequestHeader("password") String password){
+		return service.resetPassword(token, password);
+	}
+	
 	@GetMapping("/{token}")
 	public ResponseEntity<UserData> getUserById(@PathVariable("token") String token) {
 		return service.getUserByID(token);
