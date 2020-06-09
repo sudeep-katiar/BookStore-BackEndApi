@@ -142,5 +142,11 @@ public class OredrDAOImpl implements IOrderDAO {
 		hQuery.setParameter("ct", createdTime);
 		return hQuery.getSingleResult();
 	}
+
+//	@Override
+//	public void getOrder(int bookId, double userRating) {
+//		String query = "UPDATE Order SET quantity=:qty,total=:total WHERE OrderId=:id";
+//		
+//	}
 	
 }

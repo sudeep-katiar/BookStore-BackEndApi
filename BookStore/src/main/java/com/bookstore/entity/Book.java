@@ -2,7 +2,6 @@ package com.bookstore.entity;
 
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -67,5 +66,7 @@ public class Book {
 	@ManyToMany(mappedBy = "booksList")
 	@JsonIgnore
 	private List<Cart> books;
+	
+	private boolean isRated;
 	
 }
